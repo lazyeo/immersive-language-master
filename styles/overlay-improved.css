@@ -1,0 +1,1136 @@
+/* English Listening Assistant - Improved Overlay Styles */
+/* Modern color scheme avoiding blue/indigo colors */
+
+/* Custom Subtitle Styles */
+.ela-subtitle-improved {
+    background: rgba(45, 45, 45, 0.95);
+    color: white;
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-weight: 500;
+    text-align: center;
+    line-height: 1.5;
+    
+    /* Modern shadow */
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4), 0 2px 8px rgba(0, 0, 0, 0.2);
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.8);
+    
+    /* Smooth transitions */
+    transition: all 0.2s ease;
+    
+    /* Prevent text selection */
+    user-select: none;
+    
+    /* Responsive width */
+    max-width: 85%;
+    word-wrap: break-word;
+    
+    /* Stable positioning */
+    backface-visibility: hidden;
+    transform: translateZ(0);
+}
+
+/* Individual word styling */
+.ela-word {
+    display: inline;
+    transition: all 0.15s ease;
+    cursor: default;
+}
+
+/* Ensure word spacing for better readability */
+.ela-word:not(:last-child)::after {
+    content: ' ';
+    display: inline;
+}
+
+/* Unknown words (shown and highlighted) */
+.ela-unknown-word {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    color: white;
+    padding: 3px 8px;
+    border-radius: 6px;
+    margin: 0 3px;
+    cursor: pointer;
+    position: relative;
+    
+    /* Smooth hover effect */
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 4px rgba(40, 167, 69, 0.3);
+}
+
+.ela-unknown-word:hover {
+    background: linear-gradient(135deg, #20c997 0%, #17a2b8 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(40, 167, 69, 0.4);
+}
+
+.ela-unknown-word:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 6px rgba(40, 167, 69, 0.3);
+}
+
+/* Unknown words in show-all mode (more prominent highlighting) */
+.ela-unknown-word-highlight {
+    background: linear-gradient(135deg, #dc3545 0%, #fd7e14 100%);
+    color: white;
+    padding: 4px 10px;
+    border-radius: 8px;
+    margin: 0 3px;
+    cursor: pointer;
+    position: relative;
+    font-weight: 600;
+    
+    /* Enhanced visibility */
+    transition: all 0.2s ease;
+    box-shadow: 0 3px 8px rgba(220, 53, 69, 0.4);
+    border: 2px solid rgba(220, 53, 69, 0.2);
+}
+
+.ela-unknown-word-highlight:hover {
+    background: linear-gradient(135deg, #fd7e14 0%, #ffc107 100%);
+    transform: translateY(-2px) scale(1.05);
+    box-shadow: 0 6px 16px rgba(220, 53, 69, 0.5);
+    border-color: rgba(255, 193, 7, 0.6);
+}
+
+.ela-unknown-word-highlight:active {
+    transform: translateY(-1px) scale(1.02);
+    box-shadow: 0 4px 12px rgba(220, 53, 69, 0.4);
+}
+
+/* Known words in show-all mode (faded appearance) */
+.ela-known-word {
+    color: rgba(255, 255, 255, 0.4);
+    padding: 2px 6px;
+    border-radius: 4px;
+    margin: 0 2px;
+    cursor: pointer;
+    opacity: 0.6;
+    transition: all 0.2s ease;
+    background: rgba(108, 117, 125, 0.1);
+    border: 1px solid rgba(108, 117, 125, 0.2);
+}
+
+.ela-known-word:hover {
+    opacity: 0.8;
+    color: rgba(255, 255, 255, 0.7);
+    background: rgba(108, 117, 125, 0.2);
+    border-color: rgba(108, 117, 125, 0.4);
+    transform: scale(1.02);
+}
+
+.ela-known-word:active {
+    opacity: 0.9;
+    transform: scale(1);
+}
+
+/* Hidden words (shown as ___) - unified gray style */
+.ela-hidden-word {
+    color: rgba(255, 255, 255, 0.4);
+    padding: 2px 6px;
+    border-radius: 4px;
+    margin: 0 2px;
+    cursor: pointer;
+    opacity: 0.6;
+    transition: all 0.2s ease;
+    background: rgba(108, 117, 125, 0.1);
+    border: 1px solid rgba(108, 117, 125, 0.2);
+}
+
+.ela-hidden-word:hover {
+    opacity: 0.8;
+    color: rgba(255, 255, 255, 0.7);
+    background: rgba(108, 117, 125, 0.2);
+    border-color: rgba(108, 117, 125, 0.4);
+    transform: scale(1.02);
+}
+
+.ela-hidden-word:active {
+    opacity: 0.9;
+    transform: scale(1);
+}
+
+/* Tooltip styles with different types */
+.ela-tooltip {
+    position: fixed;
+    z-index: 10001;
+    
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: normal;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    
+    /* Shadow */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+    
+    /* Animation */
+    animation: tooltipFadeIn 0.2s ease;
+    
+    /* Prevent interaction */
+    user-select: none;
+    pointer-events: none;
+    
+    /* Default style */
+    background: #343a40;
+    color: white;
+    border: 1px solid #495057;
+}
+
+/* Tooltip variants */
+.ela-tooltip-unknown {
+    background: linear-gradient(135deg, #28a745, #20c997);
+    color: white;
+    border: none;
+}
+
+.ela-tooltip-hidden {
+    background: linear-gradient(135deg, #6c757d, #495057);
+    color: white;
+    border: none;
+    opacity: 0.9;
+}
+
+.ela-tooltip-success {
+    background: linear-gradient(135deg, #28a745, #155724);
+    color: white;
+    border: none;
+}
+
+.ela-tooltip-learning {
+    background: linear-gradient(135deg, #17a2b8, #117a8b);
+    color: white;
+    border: none;
+}
+
+.ela-tooltip-known {
+    background: linear-gradient(135deg, #6c757d, #495057);
+    color: white;
+    border: none;
+    opacity: 0.9;
+}
+
+/* Tooltip arrow */
+.ela-tooltip::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+    border-top: 6px solid currentColor;
+    opacity: 0.9;
+}
+
+/* Learning indicator overlay */
+.ela-learning-indicator {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 9999;
+    
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    color: white;
+    padding: 10px 16px;
+    border-radius: 25px;
+    font-size: 13px;
+    font-weight: 600;
+    
+    box-shadow: 0 3px 15px rgba(40, 167, 69, 0.3);
+    animation: slideInRight 0.3s ease;
+}
+
+/* Progress indicator for pre-study */
+.ela-progress-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 10000;
+    
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    color: white;
+    padding: 12px;
+    text-align: center;
+    font-size: 14px;
+    font-weight: 500;
+    
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    animation: slideInTop 0.3s ease;
+}
+
+.ela-progress-overlay .close-btn {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: white;
+    font-size: 18px;
+    cursor: pointer;
+    padding: 0;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    transition: background 0.2s ease;
+}
+
+.ela-progress-overlay .close-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+/* Word study modal overlay */
+.ela-study-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 10002;
+    
+    background: rgba(0, 0, 0, 0.75);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    
+    animation: modalFadeIn 0.3s ease;
+}
+
+.ela-study-content {
+    background: white;
+    border-radius: 12px;
+    padding: 30px;
+    max-width: 500px;
+    width: 90%;
+    max-height: 80vh;
+    overflow-y: auto;
+    
+    box-shadow: 0 15px 50px rgba(0, 0, 0, 0.3);
+    animation: modalSlideIn 0.3s ease;
+}
+
+.ela-study-content h2 {
+    color: #212529;
+    margin-bottom: 20px;
+    text-align: center;
+    font-size: 24px;
+}
+
+.ela-study-content .word-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.ela-study-content .word-item {
+    padding: 12px;
+    border-bottom: 1px solid #e9ecef;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: background 0.2s ease;
+}
+
+.ela-study-content .word-item:hover {
+    background: #f8f9fa;
+}
+
+.ela-study-content .word-item:last-child {
+    border-bottom: none;
+}
+
+.ela-study-content .word-text {
+    font-weight: 500;
+    color: #212529;
+}
+
+.ela-study-content .word-definition {
+    font-size: 12px;
+    color: #6c757d;
+    margin-left: 10px;
+}
+
+/* Button styles for overlay elements */
+.ela-btn {
+    border: none;
+    border-radius: 8px;
+    padding: 10px 18px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    display: inline-block;
+    text-align: center;
+    font-family: inherit;
+}
+
+.ela-btn-primary {
+    background: linear-gradient(135deg, #28a745, #20c997);
+    color: white;
+    box-shadow: 0 2px 8px rgba(40, 167, 69, 0.3);
+}
+
+.ela-btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 15px rgba(40, 167, 69, 0.4);
+}
+
+.ela-btn-secondary {
+    background: #6c757d;
+    color: white;
+    box-shadow: 0 2px 8px rgba(108, 117, 125, 0.3);
+}
+
+.ela-btn-secondary:hover {
+    background: #5a6268;
+    transform: translateY(-1px);
+}
+
+.ela-btn-warning {
+    background: linear-gradient(135deg, #ffc107, #fd7e14);
+    color: #212529;
+    box-shadow: 0 2px 8px rgba(255, 193, 7, 0.3);
+}
+
+.ela-btn-warning:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 15px rgba(255, 193, 7, 0.4);
+}
+
+.ela-btn-sm {
+    padding: 6px 12px;
+    font-size: 11px;
+}
+
+/* Animations */
+@keyframes tooltipFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(100%);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes slideInTop {
+    from {
+        opacity: 0;
+        transform: translateY(-100%);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes modalFadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-30px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .ela-subtitle-improved {
+        max-width: 95%;
+        font-size: 14px;
+        padding: 10px 16px;
+    }
+    
+    .ela-unknown-word, .ela-known-word, .ela-hidden-word {
+        padding: 2px 6px;
+        margin: 0 2px;
+        font-size: 0.9em;
+    }
+    
+    .ela-tooltip {
+        font-size: 12px;
+        padding: 6px 10px;
+    }
+    
+    .ela-study-content {
+        padding: 20px;
+        width: 95%;
+    }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+    .ela-study-content {
+        background: #2d3748;
+        color: white;
+    }
+    
+    .ela-study-content h2 {
+        color: white;
+    }
+    
+    .ela-study-content .word-text {
+        color: white;
+    }
+    
+    .ela-study-content .word-definition {
+        color: #a0aec0;
+    }
+    
+    .ela-study-content .word-item {
+        border-bottom-color: #4a5568;
+    }
+    
+    .ela-study-content .word-item:hover {
+        background: #4a5568;
+    }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+    .ela-subtitle-improved {
+        background: black;
+        border: 2px solid white;
+        color: white;
+    }
+    
+    .ela-unknown-word {
+        background: white;
+        color: black;
+        border: 2px solid black;
+    }
+    
+    .ela-known-word,
+    .ela-hidden-word {
+        background: transparent;
+        color: white;
+        border: 2px solid white;
+    }
+    
+    .ela-tooltip {
+        background: black;
+        color: white;
+        border: 2px solid white;
+    }
+}
+
+/* Subtitle Sidebar Mode Styles */
+.ela-subtitle-sidebar {
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: 400px;
+    height: 100vh;
+    background: rgba(20, 20, 20, 0.95);
+    backdrop-filter: blur(15px);
+    border-left: 1px solid rgba(255, 255, 255, 0.1);
+    z-index: 9999;
+    
+    display: flex;
+    flex-direction: column;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    
+    /* Smooth slide animation */
+    transform: translateX(100%);
+    transition: transform 0.3s ease;
+}
+
+.ela-subtitle-sidebar.visible {
+    transform: translateX(0);
+}
+
+.ela-sidebar-header {
+    padding: 16px 20px;
+    background: rgba(40, 167, 69, 0.8);
+    color: white;
+    font-weight: 600;
+    font-size: 16px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.ela-sidebar-close {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 20px;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 4px;
+    transition: background 0.2s ease;
+}
+
+.ela-sidebar-close:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.ela-sidebar-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0;
+}
+
+.ela-subtitle-timeline {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.ela-subtitle-item {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: relative;
+}
+
+.ela-subtitle-item:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.ela-subtitle-item.current {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    color: white;
+    box-shadow: 0 2px 8px rgba(40, 167, 69, 0.3);
+}
+
+.ela-subtitle-item.current::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: #ffc107;
+}
+
+.ela-subtitle-time {
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.6);
+    font-weight: 500;
+    margin-bottom: 4px;
+    font-family: 'Courier New', monospace;
+}
+
+.ela-subtitle-item.current .ela-subtitle-time {
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.ela-subtitle-text {
+    font-size: 14px;
+    line-height: 1.4;
+    color: white;
+    padding: 12px 16px 8px;
+}
+
+.ela-subtitle-item.current .ela-subtitle-text {
+    font-weight: 500;
+}
+
+/* Subtitle text with word processing in sidebar */
+.ela-sidebar-word {
+    display: inline;
+    transition: all 0.15s ease;
+    cursor: pointer;
+}
+
+.ela-sidebar-word.unknown {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    color: white;
+    padding: 2px 6px;
+    border-radius: 4px;
+    margin: 0 1px;
+}
+
+.ela-sidebar-word.known {
+    color: rgba(255, 255, 255, 0.6);
+    opacity: 0.8;
+}
+
+.ela-sidebar-word.hidden {
+    color: rgba(255, 255, 255, 0.4);
+    opacity: 0.6;
+}
+
+.ela-sidebar-word:hover {
+    opacity: 1;
+}
+
+/* Sidebar controls */
+.ela-sidebar-controls {
+    padding: 16px 20px;
+    background: rgba(30, 30, 30, 0.9);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+.ela-sidebar-button {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    flex: 1;
+}
+
+.ela-sidebar-button:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.ela-sidebar-button.active {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+}
+
+/* Sidebar toggle button */
+.ela-sidebar-toggle {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 10000;
+    
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    color: white;
+    border: none;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    font-size: 16px;
+    cursor: pointer;
+    
+    box-shadow: 0 4px 16px rgba(40, 167, 69, 0.3);
+    transition: all 0.2s ease;
+    
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.ela-sidebar-toggle:hover {
+    transform: scale(1.05);
+    box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4);
+}
+
+.ela-sidebar-toggle.active {
+    background: linear-gradient(135deg, #dc3545 0%, #fd7e14 100%);
+}
+
+/* Auto-scroll indicator */
+.ela-sidebar-autoscroll {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 3px;
+    height: 20px;
+    background: #ffc107;
+    border-radius: 2px;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.ela-subtitle-item.current .ela-sidebar-autoscroll {
+    opacity: 1;
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+    .ela-subtitle-sidebar {
+        width: 100%;
+        right: 0;
+    }
+    
+    .ela-sidebar-toggle {
+        top: 10px;
+        right: 10px;
+        width: 40px;
+        height: 40px;
+        font-size: 14px;
+    }
+    
+    .ela-subtitle-text {
+        font-size: 13px;
+        padding: 10px 12px 6px;
+    }
+    
+    .ela-sidebar-header {
+        padding: 12px 16px;
+        font-size: 14px;
+    }
+}
+
+/* Dark mode optimization */
+@media (prefers-color-scheme: dark) {
+    .ela-subtitle-sidebar {
+        background: rgba(15, 15, 15, 0.98);
+        border-left-color: rgba(255, 255, 255, 0.15);
+    }
+    
+    .ela-sidebar-controls {
+        background: rgba(20, 20, 20, 0.95);
+    }
+}
+
+/* High contrast support */
+@media (prefers-contrast: high) {
+    .ela-subtitle-sidebar {
+        background: black;
+        border-left: 2px solid white;
+    }
+    
+    .ela-subtitle-item {
+        border-bottom-color: white;
+    }
+    
+    .ela-sidebar-button {
+        border: 1px solid white;
+    }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+    .ela-subtitle-sidebar,
+    .ela-subtitle-item,
+    .ela-sidebar-word,
+    .ela-sidebar-button,
+    .ela-sidebar-toggle {
+        transition: none;
+        animation: none;
+    }
+    
+    .ela-sidebar-toggle:hover {
+        transform: none;
+    }
+}
+
+/* Immersive Mode Styles */
+.ela-immersive-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 9998;
+    pointer-events: none;
+    background: linear-gradient(
+        to bottom,
+        rgba(0, 0, 0, 0.1) 0%,
+        rgba(0, 0, 0, 0.05) 20%,
+        rgba(0, 0, 0, 0.02) 40%,
+        rgba(0, 0, 0, 0.05) 80%,
+        rgba(0, 0, 0, 0.1) 100%
+    );
+    transition: opacity 0.3s ease;
+}
+
+.ela-immersive-toolbar {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    z-index: 10000;
+    background: rgba(45, 45, 45, 0.95);
+    backdrop-filter: blur(10px);
+    color: white;
+    padding: 12px 16px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: move;
+    transition: all 0.2s ease;
+}
+
+.ela-immersive-toolbar:hover {
+    background: rgba(45, 45, 45, 0.98);
+    box-shadow: 0 6px 25px rgba(0, 0, 0, 0.4);
+}
+
+.ela-immersive-stats {
+    position: fixed;
+    top: 80px;
+    left: 20px;
+    z-index: 10000;
+    background: rgba(45, 45, 45, 0.95);
+    backdrop-filter: blur(10px);
+    color: white;
+    padding: 16px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    min-width: 200px;
+    transition: all 0.2s ease;
+}
+
+.ela-immersive-prompt {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 10001;
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    color: white;
+    padding: 15px 20px;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 500;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    box-shadow: 0 4px 20px rgba(40, 167, 69, 0.3);
+    max-width: 300px;
+    animation: slideInRight 0.3s ease;
+}
+
+.ela-immersive-button {
+    background: rgba(255, 255, 255, 0.9);
+    color: #212529;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-family: inherit;
+}
+
+.ela-immersive-button:hover {
+    background: white;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.ela-immersive-button.secondary {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+}
+
+.ela-immersive-button.secondary:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.ela-immersive-button.success {
+    background: rgba(40, 167, 69, 0.8);
+    color: white;
+}
+
+.ela-immersive-button.success:hover {
+    background: rgba(40, 167, 69, 0.9);
+}
+
+.ela-immersive-button.danger {
+    background: rgba(220, 53, 69, 0.8);
+    color: white;
+}
+
+.ela-immersive-button.danger:hover {
+    background: rgba(220, 53, 69, 0.9);
+}
+
+.ela-notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 10002;
+    color: white;
+    padding: 12px 16px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 500;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    animation: slideInRight 0.3s ease;
+    max-width: 300px;
+}
+
+.ela-notification.success {
+    background: #28a745;
+}
+
+.ela-notification.error {
+    background: #dc3545;
+}
+
+.ela-notification.info {
+    background: #17a2b8;
+}
+
+.ela-notification.warning {
+    background: #ffc107;
+    color: #212529;
+}
+
+/* Enhanced subtitle styles for immersive mode */
+.ela-immersive-mode .ela-subtitle-improved {
+    background: rgba(45, 45, 45, 0.98);
+    backdrop-filter: blur(15px);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    font-size: 1.1em;
+    padding: 16px 24px;
+}
+
+.ela-immersive-mode .ela-unknown-word,
+.ela-immersive-mode .ela-unknown-word-highlight {
+    box-shadow: 0 3px 12px rgba(40, 167, 69, 0.4);
+}
+
+.ela-immersive-mode .ela-known-word,
+.ela-immersive-mode .ela-hidden-word {
+    opacity: 0.5;
+}
+
+/* Animations for immersive mode */
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(100%);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes slideOutRight {
+    from {
+        opacity: 1;
+        transform: translateX(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateX(100%);
+    }
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeOut {
+    from {
+        opacity: 1;
+    }
+    to {
+        opacity: 0;
+    }
+}
+
+@keyframes scaleIn {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* Dark theme optimizations for immersive mode */
+@media (prefers-color-scheme: dark) {
+    .ela-immersive-toolbar,
+    .ela-immersive-stats {
+        background: rgba(25, 25, 25, 0.95);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .ela-immersive-mode .ela-subtitle-improved {
+        background: rgba(25, 25, 25, 0.98);
+        border-color: rgba(255, 255, 255, 0.15);
+    }
+}
+
+/* High contrast support for immersive mode */
+@media (prefers-contrast: high) {
+    .ela-immersive-toolbar,
+    .ela-immersive-stats {
+        background: black;
+        border: 2px solid white;
+        color: white;
+    }
+    
+    .ela-immersive-button {
+        background: white;
+        color: black;
+        border: 2px solid black;
+    }
+    
+    .ela-notification {
+        border: 2px solid white;
+    }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+    .ela-subtitle-improved,
+    .ela-tooltip,
+    .ela-learning-indicator,
+    .ela-progress-overlay,
+    .ela-study-modal,
+    .ela-study-content,
+    .ela-unknown-word,
+    .ela-known-word,
+    .ela-hidden-word,
+    .ela-btn,
+    .ela-immersive-toolbar,
+    .ela-immersive-stats,
+    .ela-immersive-prompt,
+    .ela-notification {
+        animation: none;
+        transition: none;
+    }
+    
+    .ela-unknown-word:hover,
+    .ela-known-word:hover,
+    .ela-hidden-word:hover,
+    .ela-btn:hover,
+    .ela-immersive-button:hover {
+        transform: none;
+    }
+}

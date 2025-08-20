@@ -1,0 +1,408 @@
+/* English Listening Assistant - Overlay Styles */
+/* Styles for custom subtitles and UI overlays */
+
+/* Custom Subtitle Styles */
+.ela-subtitle {
+    position: fixed;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10000;
+    
+    /* Styling */
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-weight: 500;
+    text-align: center;
+    line-height: 1.4;
+    
+    /* Shadow for better visibility */
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7);
+    
+    /* Animation */
+    animation: subtitleFadeIn 0.3s ease;
+    
+    /* Responsive width */
+    max-width: 80%;
+    word-wrap: break-word;
+}
+
+/* Individual word styling */
+.ela-word {
+    display: inline;
+    transition: all 0.2s ease;
+}
+
+/* Unknown words that are highlighted */
+.ela-unknown-word {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 2px 6px;
+    border-radius: 4px;
+    margin: 0 2px;
+    cursor: pointer;
+    position: relative;
+    
+    /* Hover effect */
+    transition: all 0.2s ease;
+}
+
+.ela-unknown-word:hover {
+    background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 3px 8px rgba(102, 126, 234, 0.4);
+}
+
+/* Tooltip for translations */
+.ela-tooltip {
+    position: fixed;
+    z-index: 10001;
+    
+    /* Styling */
+    background: #333;
+    color: white;
+    padding: 6px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: normal;
+    
+    /* Shadow */
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    
+    /* Arrow */
+    border-bottom: 5px solid #333;
+    
+    /* Animation */
+    animation: tooltipFadeIn 0.2s ease;
+    
+    /* Prevent text selection */
+    user-select: none;
+    pointer-events: none;
+}
+
+.ela-tooltip::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 5px solid #333;
+}
+
+/* Learning indicator overlay */
+.ela-learning-indicator {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 9999;
+    
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    color: white;
+    padding: 8px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 500;
+    
+    box-shadow: 0 2px 10px rgba(40, 167, 69, 0.3);
+    animation: slideInRight 0.3s ease;
+}
+
+/* Progress indicator for pre-study */
+.ela-progress-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 10000;
+    
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 10px;
+    text-align: center;
+    font-size: 14px;
+    font-weight: 500;
+    
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    animation: slideInTop 0.3s ease;
+}
+
+.ela-progress-overlay .close-btn {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: white;
+    font-size: 18px;
+    cursor: pointer;
+    padding: 0;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    transition: background 0.2s ease;
+}
+
+.ela-progress-overlay .close-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+/* Word study modal overlay */
+.ela-study-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 10002;
+    
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    
+    animation: modalFadeIn 0.3s ease;
+}
+
+.ela-study-content {
+    background: white;
+    border-radius: 12px;
+    padding: 30px;
+    max-width: 500px;
+    width: 90%;
+    max-height: 80vh;
+    overflow-y: auto;
+    
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    animation: modalSlideIn 0.3s ease;
+}
+
+.ela-study-content h2 {
+    color: #333;
+    margin-bottom: 20px;
+    text-align: center;
+    font-size: 24px;
+}
+
+.ela-study-content .word-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.ela-study-content .word-item {
+    padding: 12px;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.ela-study-content .word-item:last-child {
+    border-bottom: none;
+}
+
+.ela-study-content .word-text {
+    font-weight: 500;
+    color: #333;
+}
+
+.ela-study-content .word-definition {
+    font-size: 12px;
+    color: #666;
+    margin-left: 10px;
+}
+
+/* Button styles for overlay elements */
+.ela-btn {
+    border: none;
+    border-radius: 6px;
+    padding: 8px 16px;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    display: inline-block;
+    text-align: center;
+}
+
+.ela-btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.ela-btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.ela-btn-secondary {
+    background: #6c757d;
+    color: white;
+}
+
+.ela-btn-secondary:hover {
+    background: #5a6268;
+}
+
+/* Animations */
+@keyframes subtitleFadeIn {
+    from {
+        opacity: 0;
+        transform: translateX(-50%) translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
+}
+
+@keyframes tooltipFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(5px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(100%);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes slideInTop {
+    from {
+        opacity: 0;
+        transform: translateY(-100%);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes modalFadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .ela-subtitle {
+        max-width: 95%;
+        font-size: 14px;
+        padding: 6px 12px;
+    }
+    
+    .ela-unknown-word {
+        padding: 1px 4px;
+        margin: 0 1px;
+    }
+    
+    .ela-tooltip {
+        font-size: 11px;
+        padding: 4px 8px;
+    }
+    
+    .ela-study-content {
+        padding: 20px;
+        width: 95%;
+    }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+    .ela-study-content {
+        background: #2d3748;
+        color: white;
+    }
+    
+    .ela-study-content h2 {
+        color: white;
+    }
+    
+    .ela-study-content .word-text {
+        color: white;
+    }
+    
+    .ela-study-content .word-definition {
+        color: #a0aec0;
+    }
+    
+    .ela-study-content .word-item {
+        border-bottom-color: #4a5568;
+    }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+    .ela-subtitle {
+        background: black;
+        border: 2px solid white;
+    }
+    
+    .ela-unknown-word {
+        background: white;
+        color: black;
+        border: 1px solid black;
+    }
+    
+    .ela-tooltip {
+        background: black;
+        border: 1px solid white;
+    }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+    .ela-subtitle,
+    .ela-tooltip,
+    .ela-learning-indicator,
+    .ela-progress-overlay,
+    .ela-study-modal,
+    .ela-study-content,
+    .ela-unknown-word,
+    .ela-btn {
+        animation: none;
+        transition: none;
+    }
+    
+    .ela-unknown-word:hover {
+        transform: none;
+    }
+    
+    .ela-btn-primary:hover {
+        transform: none;
+    }
+}

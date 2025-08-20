@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Immersive Language Master Dashboard</title>
+    <link rel="stylesheet" href="newtab.css">
+</head>
+<body>
+    <div class="newtab-container">
+        <!-- Header -->
+        <header class="dashboard-header">
+            <div class="header-left">
+                <h1>📚 Immersive Language Master</h1>
+                <p class="greeting" id="greeting">Preview → Study → Practice - Master any website!</p>
+            </div>
+            <div class="header-right">
+                <div class="quick-stats">
+                    <div class="stat-item">
+                        <span class="stat-number" id="wordsLearning">0</span>
+                        <span class="stat-label">Learning</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number" id="wordsKnown">0</span>
+                        <span class="stat-label">Known</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number" id="studyStreak">0</span>
+                        <span class="stat-label">Day Streak</span>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="dashboard-main">
+            <!-- Quick Review Section -->
+            <section class="dashboard-section quick-review">
+                <div class="section-header">
+                    <h2>📚 Quick Review</h2>
+                    <div class="section-actions">
+                        <button class="btn btn-primary" id="startQuickReview">Start Review</button>
+                        <button class="btn btn-secondary" id="refreshWords">Refresh</button>
+                    </div>
+                </div>
+                <div class="review-content" id="reviewContent">
+                    <div class="word-cards-container" id="wordCards">
+                        <div class="empty-state">
+                            <div class="empty-icon">📖</div>
+                            <p>No words to review yet.</p>
+                            <p class="empty-hint">Watch videos with subtitles to start building your vocabulary!</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Today's Progress -->
+            <section class="dashboard-section progress-section">
+                <div class="section-header">
+                    <h2>📊 Today's Progress</h2>
+                    <div class="date-display" id="todayDate"></div>
+                </div>
+                <div class="progress-content">
+                    <div class="progress-grid">
+                        <div class="progress-item">
+                            <div class="progress-icon">⏱️</div>
+                            <div class="progress-info">
+                                <span class="progress-number" id="todayStudyTime">0</span>
+                                <span class="progress-label">Minutes Studied</span>
+                            </div>
+                        </div>
+                        <div class="progress-item">
+                            <div class="progress-icon">🆕</div>
+                            <div class="progress-info">
+                                <span class="progress-number" id="todayWordsEncountered">0</span>
+                                <span class="progress-label">New Words</span>
+                            </div>
+                        </div>
+                        <div class="progress-item">
+                            <div class="progress-icon">✅</div>
+                            <div class="progress-info">
+                                <span class="progress-number" id="todayWordsLearned">0</span>
+                                <span class="progress-label">Words Mastered</span>
+                            </div>
+                        </div>
+                        <div class="progress-item">
+                            <div class="progress-icon">🎯</div>
+                            <div class="progress-info">
+                                <span class="progress-number" id="vocabularyLevel">0</span>
+                                <span class="progress-label">Vocabulary Level</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Recent Learning -->
+            <section class="dashboard-section recent-section">
+                <div class="section-header">
+                    <h2>🕒 Recent Learning</h2>
+                    <button class="btn btn-text" id="viewAllHistory">View All</button>
+                </div>
+                <div class="recent-content">
+                    <div class="recent-list" id="recentList">
+                        <div class="empty-state">
+                            <p>No recent learning activity.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Quick Actions -->
+            <section class="dashboard-section actions-section">
+                <div class="section-header">
+                    <h2>⚡ Quick Actions</h2>
+                </div>
+                <div class="actions-content">
+                    <div class="action-grid">
+                        <a href="https://news.bbc.com" class="action-card">
+                            <div class="action-icon">📰</div>
+                            <div class="action-info">
+                                <h3>Read BBC News</h3>
+                                <p>Practice with current events</p>
+                            </div>
+                        </a>
+                        <a href="https://medium.com" class="action-card">
+                            <div class="action-icon">📖</div>
+                            <div class="action-info">
+                                <h3>Read Articles</h3>
+                                <p>Enhance with any website</p>
+                            </div>
+                        </a>
+                        <a href="https://youtube.com" class="action-card">
+                            <div class="action-icon">📺</div>
+                            <div class="action-info">
+                                <h3>Watch YouTube</h3>
+                                <p>Video learning with subtitles</p>
+                            </div>
+                        </a>
+                        <a href="https://netflix.com" class="action-card">
+                            <div class="action-icon">🎬</div>
+                            <div class="action-info">
+                                <h3>Watch Netflix</h3>
+                                <p>Movies & shows learning</p>
+                            </div>
+                        </a>
+                        <button class="action-card" id="openVocabularyTest">
+                            <div class="action-icon">🎯</div>
+                            <div class="action-info">
+                                <h3>Take Assessment</h3>
+                                <p>Test vocabulary level</p>
+                            </div>
+                        </button>
+                        <button class="action-card" id="openSettings">
+                            <div class="action-icon">⚙️</div>
+                            <div class="action-info">
+                                <h3>Settings</h3>
+                                <p>Configure ILM features</p>
+                            </div>
+                        </button>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Footer -->
+        <footer class="dashboard-footer">
+            <div class="footer-content">
+                <p>&copy; 2024 Immersive Language Master (ILM) v2.0.0 - Universal Language Learning</p>
+                <button class="btn btn-text btn-sm" id="disableNewTab">Use Default New Tab</button>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Review Modal -->
+    <div class="modal-overlay" id="reviewModal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>📚 Word Review</h3>
+                <button class="modal-close" id="closeReviewModal">×</button>
+            </div>
+            <div class="modal-body" id="reviewModalBody">
+                <div class="review-card">
+                    <div class="word-display" id="reviewWord">Loading...</div>
+                    <div class="word-translation" id="reviewTranslation">Loading...</div>
+                    <div class="word-actions">
+                        <button class="btn btn-success" id="knowWordBtn">I Know This</button>
+                        <button class="btn btn-danger" id="dontKnowWordBtn">Need More Practice</button>
+                        <button class="btn btn-secondary" id="nextWordBtn">Skip</button>
+                    </div>
+                </div>
+                <div class="review-progress">
+                    <span id="reviewProgressText">Word 1 of 10</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="newtab.js"></script>
+</body>
+</html>

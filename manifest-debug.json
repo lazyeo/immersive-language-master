@@ -1,0 +1,50 @@
+{
+  "manifest_version": 3,
+  "name": "English Listening Assistant (Debug)",
+  "version": "1.0.1",
+  "description": "Debug version - Improve your English listening skills with smart subtitle filtering",
+  
+  "permissions": [
+    "storage",
+    "activeTab",
+    "scripting"
+  ],
+  
+  "host_permissions": [
+    "https://www.youtube.com/*",
+    "https://youtube.com/*",
+    "https://www.netflix.com/*",
+    "https://netflix.com/*"
+  ],
+  
+  "background": {
+    "service_worker": "background.js"
+  },
+  
+  "content_scripts": [
+    {
+      "matches": ["https://www.youtube.com/*", "https://youtube.com/*"],
+      "js": ["content-scripts/debug-youtube.js"],
+      "css": ["styles/overlay.css"],
+      "run_at": "document_start"
+    },
+    {
+      "matches": ["https://www.netflix.com/*", "https://netflix.com/*"],
+      "js": ["content-scripts/netflix.js"],
+      "css": ["styles/overlay.css"],
+      "run_at": "document_idle"
+    }
+  ],
+  
+  "action": {
+    "default_popup": "popup/popup.html",
+    "default_title": "English Listening Assistant (Debug)"
+  },
+  
+  "web_accessible_resources": [
+    {
+      "resources": ["data/*.json", "styles/*.css"],
+      "matches": ["https://www.youtube.com/*", "https://www.netflix.com/*"]
+    }
+  ]
+}

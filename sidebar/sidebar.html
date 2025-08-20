@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Immersive Language Master (ILM)</title>
+    <link rel="stylesheet" href="sidebar.css">
+</head>
+<body>
+    <div class="sidebar-container">
+        <!-- Header -->
+        <header class="sidebar-header">
+            <div class="header-content">
+                <h1>📚 Immersive Language Master</h1>
+                <div class="extension-toggle">
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="extensionToggle" checked>
+                        <span class="toggle-slider"></span>
+                    </label>
+                    <span class="toggle-label" id="toggleLabel">ON</span>
+                </div>
+            </div>
+            <p class="subtitle">Preview → Study → Practice - Master any website</p>
+        </header>
+
+        <!-- Navigation Tabs -->
+        <nav class="sidebar-nav">
+            <button class="nav-tab active" data-tab="vocabulary">🎯 Assessment</button>
+            <button class="nav-tab" data-tab="learning">📈 Progress</button>
+            <button class="nav-tab" data-tab="reading">📖 Reading</button>
+            <button class="nav-tab" data-tab="settings">⚙️ Settings</button>
+        </nav>
+
+        <!-- Main Content Area -->
+        <main class="sidebar-main">
+            <!-- Vocabulary Assessment Tab -->
+            <section class="tab-content active" id="vocabularyTab">
+                <h2>Vocabulary Assessment</h2>
+                
+                <div class="assessment-status" id="assessmentStatus">
+                    <div class="current-level">
+                        <span class="label">Current Level:</span>
+                        <span class="level-display" id="currentLevel">Not Assessed</span>
+                    </div>
+                    <button class="btn btn-primary" id="startAssessmentBtn">
+                        Take Vocabulary Test
+                    </button>
+                </div>
+
+                <!-- Assessment Quiz (Hidden by default) -->
+                <div class="assessment-quiz" id="assessmentQuiz" style="display: none;">
+                    <div class="quiz-progress">
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="progressFill"></div>
+                        </div>
+                        <span class="progress-text" id="progressText">Question 1 of 25</span>
+                    </div>
+                    
+                    <div class="quiz-question">
+                        <h3 id="questionWord">Loading...</h3>
+                        <p class="question-prompt">Do you know this word?</p>
+                        <div class="quiz-options">
+                            <button class="btn btn-success" id="knowBtn">✓ I know this word</button>
+                            <button class="btn btn-danger" id="unknownBtn">✗ I don't know this word</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Learning Progress Tab -->
+            <section class="tab-content" id="learningTab">
+                <h2>Learning Progress</h2>
+                
+                <div class="learning-stats">
+                    <div class="stat-item">
+                        <span class="stat-number" id="wordsLearning">0</span>
+                        <span class="stat-label">Words Learning</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number" id="wordsKnown">0</span>
+                        <span class="stat-label">Words Known</span>
+                    </div>
+                </div>
+
+                <button class="btn btn-secondary" id="reviewWordsBtn">
+                    Review Learning Words
+                </button>
+
+                <!-- Study Mode (Hidden by default) -->
+                <div class="study-mode" id="studyMode" style="display: none;">
+                    <div class="study-header">
+                        <h3>📝 Pre-Study New Words</h3>
+                        <button class="btn btn-secondary btn-sm" id="backToProgressBtn">← Back</button>
+                    </div>
+                    <div class="study-container">
+                        <div class="word-card">
+                            <h4 class="study-word" id="studyWord">Word</h4>
+                            <p class="study-definition" id="studyDefinition">Definition will appear here</p>
+                            <div class="study-controls">
+                                <button class="btn btn-sm" id="pronounceBtn">🔊 Pronounce</button>
+                                <button class="btn btn-sm" id="nextWordBtn">Next Word</button>
+                            </div>
+                        </div>
+                        <div class="study-progress">
+                            <span id="studyProgress">0 / 0 words</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Reading Analysis Tab -->
+            <section class="tab-content" id="readingTab">
+                <h2>📖 Reading Analysis</h2>
+                
+                <div class="reading-status">
+                    <div id="pageStatus" class="status disconnected">
+                        <span class="status-dot"></span>
+                        <span class="status-text" id="pageStatusText">No active page</span>
+                    </div>
+                    <div id="pageAnalysis" class="page-analysis">
+                        <div class="analysis-stat">
+                            <span class="stat-value" id="totalWords">0</span>
+                            <span class="stat-label">Total Words</span>
+                        </div>
+                        <div class="analysis-stat">
+                            <span class="stat-value" id="unknownWords">0</span>
+                            <span class="stat-label">Unknown Words</span>
+                        </div>
+                        <div class="analysis-stat">
+                            <span class="stat-value" id="readingDifficulty">N/A</span>
+                            <span class="stat-label">Difficulty</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="reading-controls">
+                    <button class="btn btn-primary" id="requestPreview">🎯 Show Preview</button>
+                    <button class="btn btn-secondary" id="toggleBionic">⚡ Bionic Reading</button>
+                </div>
+                
+                <div class="reading-modes">
+                    <h3>Reading Modes</h3>
+                    <div class="mode-selector">
+                        <label class="mode-option">
+                            <input type="radio" name="readingMode" value="hideKnown" checked>
+                            <span class="mode-name">Hide Known Words</span>
+                            <span class="mode-desc">Replace known words with ___</span>
+                        </label>
+                        <label class="mode-option">
+                            <input type="radio" name="readingMode" value="highlightUnknown">
+                            <span class="mode-name">Highlight Unknown</span>
+                            <span class="mode-desc">Highlight words to learn</span>
+                        </label>
+                        <label class="mode-option">
+                            <input type="radio" name="readingMode" value="showAll">
+                            <span class="mode-name">Show All</span>
+                            <span class="mode-desc">No modifications</span>
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="word-interaction-guide">
+                    <h3>💡 How to Use</h3>
+                    <div class="interaction-item">
+                        <span class="interaction-icon">👆</span>
+                        <span class="interaction-text">Click green words to mark as known</span>
+                    </div>
+                    <div class="interaction-item">
+                        <span class="interaction-icon">🖱️</span>
+                        <span class="interaction-text">Hover for instant translations</span>
+                    </div>
+                    <div class="interaction-item">
+                        <span class="interaction-icon">📝</span>
+                        <span class="interaction-text">Use practice mode before reading</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Settings Tab -->
+            <section class="tab-content" id="settingsTab">
+                <h2>Settings</h2>
+                
+                <div class="settings-group">
+                    <h3>Display Settings</h3>
+                    
+                    <div class="setting-item">
+                        <label for="showTranslationToggle">Show translation on hover:</label>
+                        <input type="checkbox" id="showTranslationToggle" checked>
+                    </div>
+                    
+                    <div class="setting-item">
+                        <label for="fontSizeSelect">Subtitle font size:</label>
+                        <select id="fontSizeSelect">
+                            <option value="small">Small</option>
+                            <option value="medium" selected>Medium</option>
+                            <option value="large">Large</option>
+                        </select>
+                    </div>
+
+                    <div class="setting-item">
+                        <label for="positionSelect">Subtitle position:</label>
+                        <select id="positionSelect">
+                            <option value="top">Top</option>
+                            <option value="bottom" selected>Bottom</option>
+                            <option value="center">Center</option>
+                        </select>
+                    </div>
+
+                    <div class="setting-item">
+                        <label for="displayModeSelect">Subtitle display mode:</label>
+                        <select id="displayModeSelect">
+                            <option value="hideKnown" selected>Hide Known Words</option>
+                            <option value="showAll">Show All Words</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="settings-group">
+                    <h3>ILM Features</h3>
+                    
+                    <div class="setting-item">
+                        <label for="previewModeToggle">Preview-Study-Practice Mode:</label>
+                        <input type="checkbox" id="previewModeToggle" checked>
+                    </div>
+                    
+                    <div class="setting-item">
+                        <label for="bionicReadingToggle">Bionic Reading Enhancement:</label>
+                        <input type="checkbox" id="bionicReadingToggle">
+                    </div>
+                    
+                    <div class="setting-item">
+                        <label for="practiceReminderToggle">Practice Mode Reminders:</label>
+                        <input type="checkbox" id="practiceReminderToggle" checked>
+                    </div>
+                    
+                    <div class="setting-item">
+                        <label for="universalProcessingToggle">Universal Website Processing:</label>
+                        <input type="checkbox" id="universalProcessingToggle" checked>
+                    </div>
+                </div>
+                
+                <div class="settings-group">
+                    <h3>📱 New Tab Dashboard</h3>
+                    <p class="setting-description">Transform your new tab page into a personalized English learning dashboard with vocabulary review, progress tracking, and quick actions.</p>
+                    
+                    <div class="setting-item">
+                        <label for="newTabEnabled">Enable Learning Dashboard:</label>
+                        <input type="checkbox" id="newTabEnabled" checked>
+                    </div>
+                    
+                    <div class="setting-actions">
+                        <button class="btn btn-secondary" id="openNewTabPreview">Preview Dashboard</button>
+                        <button class="btn btn-text" id="resetNewTabSettings">Reset to Default</button>
+                    </div>
+                </div>
+
+                <div class="settings-group">
+                    <h3>翻译设置</h3>
+                    
+                    <div class="setting-item">
+                        <label for="translationEnabled">启用翻译功能:</label>
+                        <input type="checkbox" id="translationEnabled" checked>
+                    </div>
+                    
+                    <div class="setting-item">
+                        <label for="translationProvider">翻译服务商:</label>
+                        <select id="translationProvider">
+                            <option value="google" selected>Google Translate (免费)</option>
+                            <option value="deepl">DeepL</option>
+                            <option value="claude">Claude AI</option>
+                            <option value="chatgpt">ChatGPT</option>
+                            <option value="xai">xAI</option>
+                            <option value="gemini">Gemini</option>
+                        </select>
+                    </div>
+                    
+                    <div class="setting-item">
+                        <label for="translationLanguage">目标语言:</label>
+                        <select id="translationLanguage">
+                            <option value="zh-CN" selected>中文 (简体)</option>
+                            <option value="zh-TW">中文 (繁体)</option>
+                            <option value="ja">日语</option>
+                            <option value="ko">韩语</option>
+                            <option value="fr">法语</option>
+                            <option value="de">德语</option>
+                            <option value="es">西班牙语</option>
+                        </select>
+                    </div>
+                    
+                    <div class="setting-item">
+                        <label for="showTranslationOnHover">悬停显示翻译:</label>
+                        <input type="checkbox" id="showTranslationOnHover" checked>
+                    </div>
+                </div>
+
+                <div class="settings-group" id="apiKeysGroup">
+                    <h3>API密钥配置</h3>
+                    <p class="setting-description">配置AI翻译服务的API密钥。免费的Google翻译不需要API密钥。</p>
+                    
+                    <div class="setting-item" id="deeplApiKeyGroup" style="display: none;">
+                        <label for="deeplApiKey">DeepL API Key:</label>
+                        <input type="password" id="deeplApiKey" placeholder="输入DeepL API密钥">
+                    </div>
+                    
+                    <div class="setting-item" id="claudeApiKeyGroup" style="display: none;">
+                        <label for="claudeApiKey">Claude API Key:</label>
+                        <input type="password" id="claudeApiKey" placeholder="输入Anthropic API密钥">
+                    </div>
+                    
+                    <div class="setting-item" id="openaiApiKeyGroup" style="display: none;">
+                        <label for="openaiApiKey">OpenAI API Key:</label>
+                        <input type="password" id="openaiApiKey" placeholder="输入OpenAI API密钥">
+                    </div>
+                    
+                    <div class="setting-item" id="xaiApiKeyGroup" style="display: none;">
+                        <label for="xaiApiKey">xAI API Key:</label>
+                        <input type="password" id="xaiApiKey" placeholder="输入xAI API密钥">
+                    </div>
+                    
+                    <div class="setting-item" id="geminiApiKeyGroup" style="display: none;">
+                        <label for="geminiApiKey">Gemini API Key:</label>
+                        <input type="password" id="geminiApiKey" placeholder="输入Google AI API密钥">
+                    </div>
+                    
+                    <button class="btn btn-primary" id="saveTranslationSettings">保存翻译设置</button>
+                </div>
+            </section>
+        </main>
+
+        <!-- Footer -->
+        <footer class="sidebar-footer">
+            <div class="version-info">
+                <span class="version">v2.0.0</span>
+                <span class="mode-indicator">ILM Universal Mode</span>
+            </div>
+        </footer>
+    </div>
+
+    <script src="../services/translation-service.js"></script>
+    <script src="sidebar.js"></script>
+</body>
+</html>

@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>English Listening Assistant</title>
+    <link rel="stylesheet" href="popup-improved.css">
+</head>
+<body>
+    <div class="popup-container">
+        <!-- Header -->
+        <header class="popup-header">
+            <div class="header-top">
+                <h1>🎧 English Listening Assistant</h1>
+                <div class="extension-toggle">
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="extensionToggle" checked>
+                        <span class="toggle-slider"></span>
+                    </label>
+                    <span class="toggle-label" id="toggleLabel">ON</span>
+                </div>
+            </div>
+            <p class="subtitle">Improve your listening with smart subtitles</p>
+        </header>
+
+        <!-- Main Content -->
+        <main class="popup-main">
+            <!-- Vocabulary Assessment Section -->
+            <section class="vocabulary-section" id="vocabularySection">
+                <h2>📚 Vocabulary Assessment</h2>
+                
+                <div class="assessment-status" id="assessmentStatus">
+                    <div class="current-level">
+                        <span class="label">Current Level:</span>
+                        <span class="level-display" id="currentLevel">Not Assessed</span>
+                    </div>
+                    <button class="btn btn-primary" id="startAssessmentBtn">
+                        Take Vocabulary Test
+                    </button>
+                </div>
+
+                <!-- Assessment Quiz (Hidden by default) -->
+                <div class="assessment-quiz" id="assessmentQuiz" style="display: none;">
+                    <div class="quiz-progress">
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="progressFill"></div>
+                        </div>
+                        <span class="progress-text" id="progressText">Question 1 of 25</span>
+                    </div>
+                    
+                    <div class="quiz-question">
+                        <h3 id="questionWord">Loading...</h3>
+                        <p class="question-prompt">Do you know this word?</p>
+                        <div class="quiz-options">
+                            <button class="btn btn-success" id="knowBtn">✓ I know this word</button>
+                            <button class="btn btn-danger" id="unknownBtn">✗ I don't know this word</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Learning Progress Section -->
+            <section class="learning-section" id="learningSection">
+                <h2>📖 Learning Progress</h2>
+                
+                <div class="learning-stats">
+                    <div class="stat-item">
+                        <span class="stat-number" id="wordsLearning">0</span>
+                        <span class="stat-label">Words Learning</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number" id="wordsKnown">0</span>
+                        <span class="stat-label">Words Known</span>
+                    </div>
+                </div>
+
+                <button class="btn btn-secondary" id="reviewWordsBtn">
+                    Review Learning Words
+                </button>
+            </section>
+
+            <!-- Settings Section -->
+            <section class="settings-section" id="settingsSection">
+                <h2>⚙️ Settings</h2>
+                
+                <div class="setting-item">
+                    <label for="showTranslationToggle">Show translation on hover:</label>
+                    <input type="checkbox" id="showTranslationToggle" checked>
+                </div>
+                
+                <div class="setting-item">
+                    <label for="fontSizeSelect">Subtitle font size:</label>
+                    <select id="fontSizeSelect">
+                        <option value="small">Small</option>
+                        <option value="medium" selected>Medium</option>
+                        <option value="large">Large</option>
+                    </select>
+                </div>
+
+                <div class="setting-item">
+                    <label for="positionSelect">Subtitle position:</label>
+                    <select id="positionSelect">
+                        <option value="top">Top</option>
+                        <option value="bottom" selected>Bottom</option>
+                        <option value="center">Center</option>
+                    </select>
+                </div>
+
+                <div class="setting-item">
+                    <label for="displayModeSelect">Subtitle display mode:</label>
+                    <select id="displayModeSelect">
+                        <option value="hideKnown" selected>Hide Known Words</option>
+                        <option value="showAll">Show All Words</option>
+                    </select>
+                </div>
+
+                <div class="setting-item">
+                    <label for="immersiveModeToggle">Immersive learning mode:</label>
+                    <input type="checkbox" id="immersiveModeToggle">
+                </div>
+            </section>
+
+            <!-- Study Mode Section -->
+            <section class="study-section" id="studySection" style="display: none;">
+                <div class="section-header">
+                    <h2>📝 Pre-Study New Words</h2>
+                    <button class="btn btn-secondary btn-sm" id="backToMainBtn">← Back</button>
+                </div>
+                <div class="study-container">
+                    <div class="word-card" id="wordCard">
+                        <h3 class="study-word" id="studyWord">Word</h3>
+                        <p class="study-definition" id="studyDefinition">Definition will appear here</p>
+                        <div class="study-controls">
+                            <button class="btn btn-sm" id="pronounceBtn">🔊 Pronounce</button>
+                            <button class="btn btn-sm" id="nextWordBtn">Next Word</button>
+                        </div>
+                    </div>
+                    <div class="study-progress">
+                        <span id="studyProgress">0 / 0 words</span>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Footer -->
+        <footer class="popup-footer">
+            <p class="version">v1.0.0</p>
+        </footer>
+    </div>
+
+    <script src="popup.js"></script>
+</body>
+</html>

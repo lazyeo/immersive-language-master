@@ -1,0 +1,104 @@
+{
+  "manifest_version": 3,
+  "name": "Immersive Language Master (ILM)",
+  "version": "2.0.0",
+  "description": "v2.0.0 - Smart language learning with preview-study-practice methodology for all websites",
+  
+  "permissions": [
+    "storage",
+    "activeTab",
+    "scripting",
+    "sidePanel",
+    "tabs",
+    "contextMenus",
+    "webRequest"
+  ],
+  
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  
+  "background": {
+    "service_worker": "background.js"
+  },
+  
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": [
+        "services/translation-service.js", 
+        "core/text-analyzer.js",
+        "core/word-processor.js",
+        "content-scripts/universal-processor.js"
+      ],
+      "css": [
+        "styles/universal-overlay.css",
+        "styles/bionic-reading.css"
+      ],
+      "run_at": "document_end",
+      "exclude_matches": [
+        "https://www.youtube.com/*", 
+        "https://youtube.com/*",
+        "https://www.netflix.com/*", 
+        "https://netflix.com/*"
+      ]
+    },
+    {
+      "matches": ["https://www.youtube.com/*", "https://youtube.com/*"],
+      "js": [
+        "services/translation-service.js", 
+        "core/text-analyzer.js",
+        "core/word-processor.js",
+        "content-scripts/universal-processor.js",
+        "content-scripts/youtube-improved.js"
+      ],
+      "css": [
+        "styles/overlay-improved.css",
+        "styles/universal-overlay.css",
+        "styles/bionic-reading.css"
+      ],
+      "run_at": "document_end"
+    },
+    {
+      "matches": ["https://www.netflix.com/*", "https://netflix.com/*"],
+      "js": [
+        "services/translation-service.js", 
+        "core/text-analyzer.js",
+        "core/word-processor.js",
+        "content-scripts/universal-processor.js",
+        "content-scripts/netflix-improved.js"
+      ],
+      "css": [
+        "styles/overlay-improved.css",
+        "styles/universal-overlay.css",
+        "styles/bionic-reading.css"
+      ],
+      "run_at": "document_end"
+    }
+  ],
+  
+  "action": {
+    "default_title": "Immersive Language Master (ILM)"
+  },
+  
+  "side_panel": {
+    "default_path": "sidebar/sidebar.html"
+  },
+
+  "chrome_url_overrides": {
+    "newtab": "newtab/newtab.html"
+  },
+  
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "data/*.json", 
+        "styles/*.css", 
+        "core/*.js",
+        "ui/components/*.js",
+        "assets/*"
+      ],
+      "matches": ["<all_urls>"]
+    }
+  ]
+}
