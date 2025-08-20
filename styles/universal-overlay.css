@@ -2058,6 +2058,327 @@
     }
 }
 
+/* ============================================
+   Difficulty Analysis Styles
+   ============================================ */
+
+.ilm-difficulty-analysis {
+    margin-bottom: 20px;
+    padding: 16px;
+    background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
+    border-radius: 12px;
+    border: 1px solid #bae6fd;
+}
+
+.ilm-difficulty-analysis-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.ilm-difficulty-analysis-title {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #0369a1;
+}
+
+.ilm-analysis-toggle {
+    background: #0ea5e9;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 6px 12px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.ilm-analysis-toggle:hover {
+    background: #0284c7;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(14, 165, 233, 0.3);
+}
+
+.ilm-difficulty-summary {
+    display: flex;
+    gap: 24px;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.ilm-difficulty-score {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+}
+
+.ilm-score-circle {
+    position: relative;
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: #e2e8f0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.ilm-score-fill {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: conic-gradient(
+        #38b2ac 0deg,
+        #38b2ac calc(var(--score) * 3.6deg),
+        #e2e8f0 calc(var(--score) * 3.6deg),
+        #e2e8f0 360deg
+    );
+    transition: background 0.8s ease-out;
+}
+
+.ilm-score-text {
+    position: relative;
+    z-index: 1;
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: #2d3748;
+    background: white;
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.ilm-score-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.ilm-cefr-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.ilm-cefr-level-display {
+    font-size: 2rem;
+    font-weight: 700;
+    padding: 8px 16px;
+    border-radius: 8px;
+    text-align: center;
+    min-width: 80px;
+}
+
+.ilm-cefr-level-display.cefr-A1 { background: #dcfce7; color: #166534; }
+.ilm-cefr-level-display.cefr-A2 { background: #d1fae5; color: #15803d; }
+.ilm-cefr-level-display.cefr-B1 { background: #fef3c7; color: #92400e; }
+.ilm-cefr-level-display.cefr-B2 { background: #fed7aa; color: #c2410c; }
+.ilm-cefr-level-display.cefr-C1 { background: #fecaca; color: #dc2626; }
+.ilm-cefr-level-display.cefr-C2 { background: #e0e7ff; color: #3730a3; }
+
+.ilm-cefr-badge {
+    padding: 3px 8px;
+    border-radius: 10px;
+    font-size: 0.625rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border: 1px solid transparent;
+}
+
+.ilm-cefr-badge.cefr-A1 { background: #dcfce7; color: #166534; border-color: #bbf7d0; }
+.ilm-cefr-badge.cefr-A2 { background: #d1fae5; color: #15803d; border-color: #a7f3d0; }
+.ilm-cefr-badge.cefr-B1 { background: #fef3c7; color: #92400e; border-color: #fde68a; }
+.ilm-cefr-badge.cefr-B2 { background: #fed7aa; color: #c2410c; border-color: #fdba74; }
+.ilm-cefr-badge.cefr-C1 { background: #fecaca; color: #dc2626; border-color: #fca5a5; }
+.ilm-cefr-badge.cefr-C2 { background: #e0e7ff; color: #3730a3; border-color: #c7d2fe; }
+
+.ilm-cefr-description {
+    font-size: 0.875rem;
+    color: #64748b;
+    font-weight: 500;
+}
+
+.ilm-factors-breakdown h5,
+.ilm-learning-recommendations h5,
+.ilm-learning-tips h5 {
+    margin: 16px 0 12px 0;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #374151;
+}
+
+.ilm-factors-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.ilm-factor-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px;
+    background: rgba(56, 178, 172, 0.05);
+    border-radius: 8px;
+}
+
+.ilm-factor-name {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #374151;
+    min-width: 90px;
+}
+
+.ilm-factor-bar {
+    flex: 1;
+    height: 6px;
+    background: #e2e8f0;
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.ilm-factor-fill {
+    height: 100%;
+    background: linear-gradient(135deg, #38b2ac, #319795);
+    border-radius: 3px;
+    transition: width 0.8s ease-out;
+}
+
+.ilm-factor-score {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #38b2ac;
+    min-width: 35px;
+    text-align: right;
+}
+
+.ilm-recommendations-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.ilm-recommendation-item {
+    padding: 8px 12px;
+    background: rgba(16, 185, 129, 0.1);
+    border-radius: 8px;
+    border-left: 3px solid #10b981;
+    font-size: 0.8125rem;
+    line-height: 1.4;
+    color: #374151;
+}
+
+.ilm-tips-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 12px;
+}
+
+.ilm-tip-category {
+    background: rgba(59, 130, 246, 0.05);
+    border-radius: 8px;
+    padding: 12px;
+    border: 1px solid rgba(59, 130, 246, 0.1);
+}
+
+.ilm-tip-title {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #3b82f6;
+    margin-bottom: 8px;
+}
+
+.ilm-tip-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.ilm-tip-list li {
+    font-size: 0.75rem;
+    color: #4b5563;
+    padding: 2px 0;
+    position: relative;
+    padding-left: 12px;
+}
+
+.ilm-tip-list li::before {
+    content: '•';
+    position: absolute;
+    left: 0;
+    color: #3b82f6;
+    font-weight: bold;
+}
+
+/* Dark mode support for difficulty analysis */
+@media (prefers-color-scheme: dark) {
+    .ilm-difficulty-analysis {
+        background: linear-gradient(135deg, #1e293b, #334155);
+        border-color: #475569;
+    }
+    
+    .ilm-difficulty-analysis-title {
+        color: #38bdf8;
+    }
+    
+    .ilm-score-text {
+        background: #1e293b;
+        color: #e2e8f0;
+    }
+    
+    .ilm-score-label,
+    .ilm-cefr-description {
+        color: #94a3b8;
+    }
+    
+    .ilm-factors-breakdown h5,
+    .ilm-learning-recommendations h5,
+    .ilm-learning-tips h5 {
+        color: #e2e8f0;
+    }
+    
+    .ilm-factor-name {
+        color: #e2e8f0;
+    }
+    
+    .ilm-factor-item {
+        background: rgba(56, 178, 172, 0.1);
+    }
+    
+    .ilm-recommendation-item {
+        background: rgba(16, 185, 129, 0.2);
+        color: #e2e8f0;
+    }
+    
+    .ilm-tip-category {
+        background: rgba(59, 130, 246, 0.15);
+        border-color: rgba(59, 130, 246, 0.3);
+    }
+    
+    .ilm-tip-list li {
+        color: #cbd5e0;
+    }
+}
+
 /* Responsive design for enhanced popup */
 @media (max-width: 768px) {
     .ilm-enhanced-popup {

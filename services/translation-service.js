@@ -961,35 +961,416 @@ class TranslationService {
     }
 
     /**
-     * Get word difficulty level
+     * Get word difficulty level with advanced multi-factor analysis
      * @param {string} word - Word to assess
      * @returns {string} Difficulty level
      */
     getWordDifficulty(word) {
-        const frequency = this.getWordFrequency(word);
+        const difficultyScore = this.calculateAdvancedDifficultyScore(word);
         
-        if (frequency <= 1000) return 'Basic';
-        if (frequency <= 2000) return 'Elementary';
-        if (frequency <= 3000) return 'Intermediate';
-        if (frequency <= 4000) return 'Upper-Intermediate';
-        if (frequency <= 5000) return 'Advanced';
+        // CEFR-aligned difficulty mapping based on comprehensive analysis
+        if (difficultyScore <= 0.2) return 'Basic';
+        if (difficultyScore <= 0.35) return 'Elementary';
+        if (difficultyScore <= 0.5) return 'Intermediate';
+        if (difficultyScore <= 0.65) return 'Upper-Intermediate';
+        if (difficultyScore <= 0.8) return 'Advanced';
         return 'Expert';
     }
 
     /**
-     * Get vocabulary level classification
+     * Calculate advanced difficulty score using multiple linguistic factors
+     * @param {string} word - Word to analyze
+     * @returns {number} Difficulty score between 0 and 1
+     */
+    calculateAdvancedDifficultyScore(word) {
+        const factors = {
+            frequency: this.calculateFrequencyScore(word),
+            morphological: this.calculateMorphologicalComplexity(word),
+            phonological: this.calculatePhonologicalComplexity(word),
+            semantic: this.calculateSemanticComplexity(word),
+            orthographic: this.calculateOrthographicComplexity(word)
+        };
+
+        // Weighted combination of factors
+        const weights = {
+            frequency: 0.4,      // Frequency is most important
+            morphological: 0.2,   // Word formation complexity
+            phonological: 0.15,   // Pronunciation difficulty
+            semantic: 0.15,       // Meaning complexity
+            orthographic: 0.1     // Spelling difficulty
+        };
+
+        let totalScore = 0;
+        for (const [factor, score] of Object.entries(factors)) {
+            totalScore += score * weights[factor];
+        }
+
+        return Math.min(1, Math.max(0, totalScore));
+    }
+
+    /**
+     * Calculate frequency-based difficulty score
+     * @param {string} word - Word to analyze
+     * @returns {number} Score between 0 (easy) and 1 (difficult)
+     */
+    calculateFrequencyScore(word) {
+        const frequency = this.getWordFrequency(word);
+        
+        // Logarithmic scaling for better distribution
+        if (frequency <= 100) return 0;           // Top 100 words: very easy
+        if (frequency <= 500) return 0.1;        // Top 500: easy
+        if (frequency <= 1000) return 0.2;       // Top 1K: basic
+        if (frequency <= 2000) return 0.35;      // Top 2K: elementary
+        if (frequency <= 3000) return 0.5;       // Top 3K: intermediate
+        if (frequency <= 5000) return 0.65;      // Top 5K: upper-intermediate
+        if (frequency <= 8000) return 0.8;       // Top 8K: advanced
+        return 0.95;                             // Beyond 8K: expert
+    }
+
+    /**
+     * Calculate morphological complexity based on affixes and word structure
+     * @param {string} word - Word to analyze
+     * @returns {number} Score between 0 and 1
+     */
+    calculateMorphologicalComplexity(word) {
+        const lowerWord = word.toLowerCase();
+        let complexity = 0;
+
+        // Common prefixes with difficulty weights
+        const prefixes = {
+            'un-': 0.1, 're-': 0.1, 'pre-': 0.2, 'dis-': 0.2, 'in-': 0.15,
+            'anti-': 0.3, 'counter-': 0.35, 'inter-': 0.3, 'super-': 0.25,
+            'ultra-': 0.4, 'pseudo-': 0.45, 'quasi-': 0.5, 'circum-': 0.55
+        };
+
+        // Common suffixes with difficulty weights
+        const suffixes = {
+            '-ed': 0.05, '-ing': 0.05, '-ly': 0.1, '-tion': 0.2, '-sion': 0.2,
+            '-ness': 0.15, '-ment': 0.2, '-ity': 0.25, '-ous': 0.2, '-ious': 0.25,
+            '-ological': 0.5, '-ization': 0.45, '-ification': 0.5
+        };
+
+        // Check for prefixes
+        for (const [prefix, weight] of Object.entries(prefixes)) {
+            if (lowerWord.startsWith(prefix.slice(0, -1))) {
+                complexity += weight;
+            }
+        }
+
+        // Check for suffixes
+        for (const [suffix, weight] of Object.entries(suffixes)) {
+            if (lowerWord.endsWith(suffix.slice(1))) {
+                complexity += weight;
+            }
+        }
+
+        // Additional complexity for compound words
+        if (lowerWord.length > 10) complexity += 0.1;
+        if (lowerWord.length > 15) complexity += 0.2;
+
+        return Math.min(1, complexity);
+    }
+
+    /**
+     * Calculate phonological complexity based on pronunciation patterns
+     * @param {string} word - Word to analyze
+     * @returns {number} Score between 0 and 1
+     */
+    calculatePhonologicalComplexity(word) {
+        const lowerWord = word.toLowerCase();
+        let complexity = 0;
+
+        // Consonant clusters increase difficulty
+        const consonantClusters = /[bcdfghjklmnpqrstvwxyz]{3,}/gi;
+        const clusters = (lowerWord.match(consonantClusters) || []).length;
+        complexity += clusters * 0.15;
+
+        // Silent letters and irregular patterns
+        const silentPatterns = [
+            /ght$/, /mb$/, /kn/, /wr/, /ps/, /sc/, /gn/
+        ];
+        
+        for (const pattern of silentPatterns) {
+            if (pattern.test(lowerWord)) {
+                complexity += 0.2;
+            }
+        }
+
+        // Vowel complexity (diphthongs, etc.)
+        const complexVowels = /[aeiou]{2,}/g;
+        const vowelGroups = (lowerWord.match(complexVowels) || []).length;
+        complexity += vowelGroups * 0.1;
+
+        return Math.min(1, complexity);
+    }
+
+    /**
+     * Calculate semantic complexity based on word abstractness
+     * @param {string} word - Word to analyze
+     * @returns {number} Score between 0 and 1
+     */
+    calculateSemanticComplexity(word) {
+        const lowerWord = word.toLowerCase();
+        
+        // Abstract concepts are more difficult
+        const abstractIndicators = [
+            'concept', 'theory', 'principle', 'philosophy', 'methodology',
+            'paradigm', 'phenomenon', 'hypothesis', 'ideology', 'metaphor',
+            'consciousness', 'perception', 'abstraction', 'interpretation'
+        ];
+
+        // Technical/academic terms
+        const technicalSuffixes = [
+            'ology', 'ography', 'ometry', 'istics', 'ism', 'ics'
+        ];
+
+        let complexity = 0.2; // Base semantic complexity
+
+        // Check for abstract indicators
+        for (const indicator of abstractIndicators) {
+            if (lowerWord.includes(indicator)) {
+                complexity += 0.3;
+                break;
+            }
+        }
+
+        // Check for technical suffixes
+        for (const suffix of technicalSuffixes) {
+            if (lowerWord.endsWith(suffix)) {
+                complexity += 0.2;
+                break;
+            }
+        }
+
+        // Domain-specific complexity
+        if (this.isDomainSpecificTerm(lowerWord)) {
+            complexity += 0.25;
+        }
+
+        return Math.min(1, complexity);
+    }
+
+    /**
+     * Calculate orthographic complexity based on spelling patterns
+     * @param {string} word - Word to analyze
+     * @returns {number} Score between 0 and 1
+     */
+    calculateOrthographicComplexity(word) {
+        const lowerWord = word.toLowerCase();
+        let complexity = 0;
+
+        // Double letters
+        const doubleLetters = /(.)\1/g;
+        const doubles = (lowerWord.match(doubleLetters) || []).length;
+        complexity += doubles * 0.1;
+
+        // Unusual letter combinations
+        const unusualPatterns = [
+            /ph/, /gh/, /ch/, /th/, /qu/, /x/, /z/
+        ];
+
+        for (const pattern of unusualPatterns) {
+            if (pattern.test(lowerWord)) {
+                complexity += 0.05;
+            }
+        }
+
+        // Length-based complexity
+        if (lowerWord.length > 8) complexity += 0.1;
+        if (lowerWord.length > 12) complexity += 0.2;
+
+        return Math.min(1, complexity);
+    }
+
+    /**
+     * Check if word is domain-specific (technical/academic)
+     * @param {string} word - Word to check
+     * @returns {boolean} True if domain-specific
+     */
+    isDomainSpecificTerm(word) {
+        const domains = {
+            medical: ['diagnosis', 'syndrome', 'therapy', 'clinical', 'pathology'],
+            legal: ['jurisdiction', 'litigation', 'statutory', 'constitutional'],
+            scientific: ['hypothesis', 'empirical', 'methodology', 'quantitative'],
+            technical: ['algorithm', 'optimization', 'implementation', 'architecture'],
+            academic: ['theoretical', 'conceptual', 'analytical', 'comprehensive']
+        };
+
+        for (const domainTerms of Object.values(domains)) {
+            if (domainTerms.some(term => word.includes(term))) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Get vocabulary level classification with CEFR and advanced metrics
      * @param {string} word - Word to classify
      * @returns {string} Vocabulary level
      */
     getVocabularyLevel(word) {
+        const difficultyScore = this.calculateAdvancedDifficultyScore(word);
+        const frequency = this.getWordFrequency(word);
+        const cefrLevel = this.getCEFRLevel(word);
+        
+        // Create comprehensive level description
+        const frequencyBand = this.getFrequencyBand(frequency);
+        
+        return `${cefrLevel} (${frequencyBand})`;
+    }
+
+    /**
+     * Get CEFR (Common European Framework of Reference) level for word
+     * @param {string} word - Word to classify
+     * @returns {string} CEFR level (A1, A2, B1, B2, C1, C2)
+     */
+    getCEFRLevel(word) {
+        const difficultyScore = this.calculateAdvancedDifficultyScore(word);
         const frequency = this.getWordFrequency(word);
         
-        if (frequency <= 1000) return 'K1 (Most Common)';
-        if (frequency <= 2000) return 'K2 (Common)';
-        if (frequency <= 3000) return 'K3 (Frequent)';
-        if (frequency <= 4000) return 'K4 (Intermediate)';
-        if (frequency <= 5000) return 'K5 (Advanced)';
-        return 'Academic/Professional';
+        // CEFR mapping based on frequency and complexity
+        // A1: Most basic survival vocabulary
+        if (frequency <= 300 && difficultyScore <= 0.15) return 'A1';
+        
+        // A2: Elementary vocabulary for daily situations
+        if (frequency <= 800 && difficultyScore <= 0.25) return 'A2';
+        
+        // B1: Intermediate vocabulary for familiar topics
+        if (frequency <= 2000 && difficultyScore <= 0.4) return 'B1';
+        
+        // B2: Upper-intermediate for complex topics
+        if (frequency <= 4000 && difficultyScore <= 0.6) return 'B2';
+        
+        // C1: Advanced vocabulary for nuanced communication
+        if (frequency <= 8000 && difficultyScore <= 0.8) return 'C1';
+        
+        // C2: Near-native proficiency vocabulary
+        return 'C2';
+    }
+
+    /**
+     * Get frequency band description
+     * @param {number} frequency - Word frequency rank
+     * @returns {string} Frequency band description
+     */
+    getFrequencyBand(frequency) {
+        if (frequency <= 100) return 'Essential';
+        if (frequency <= 500) return 'Core';
+        if (frequency <= 1000) return 'High Frequency';
+        if (frequency <= 2000) return 'Medium Frequency';
+        if (frequency <= 3000) return 'Low Frequency';
+        if (frequency <= 5000) return 'Academic';
+        if (frequency <= 8000) return 'Specialized';
+        return 'Rare/Technical';
+    }
+
+    /**
+     * Get detailed difficulty breakdown for educational purposes
+     * @param {string} word - Word to analyze
+     * @returns {Object} Detailed difficulty analysis
+     */
+    getDifficultyBreakdown(word) {
+        const factors = {
+            frequency: this.calculateFrequencyScore(word),
+            morphological: this.calculateMorphologicalComplexity(word),
+            phonological: this.calculatePhonologicalComplexity(word),
+            semantic: this.calculateSemanticComplexity(word),
+            orthographic: this.calculateOrthographicComplexity(word)
+        };
+
+        const overallScore = this.calculateAdvancedDifficultyScore(word);
+        const cefrLevel = this.getCEFRLevel(word);
+        const difficulty = this.getWordDifficulty(word);
+
+        return {
+            overall: {
+                score: overallScore,
+                difficulty: difficulty,
+                cefrLevel: cefrLevel
+            },
+            factors: factors,
+            recommendations: this.getDifficultyRecommendations(overallScore, factors),
+            learningTips: this.getLearningTips(word, factors)
+        };
+    }
+
+    /**
+     * Get learning recommendations based on difficulty analysis
+     * @param {number} overallScore - Overall difficulty score
+     * @param {Object} factors - Individual difficulty factors
+     * @returns {Array} Array of learning recommendations
+     */
+    getDifficultyRecommendations(overallScore, factors) {
+        const recommendations = [];
+
+        if (factors.frequency > 0.6) {
+            recommendations.push('📚 Focus on understanding context - this is a less common word');
+        }
+
+        if (factors.morphological > 0.3) {
+            recommendations.push('🔬 Break down the word parts (prefix, root, suffix) to understand meaning');
+        }
+
+        if (factors.phonological > 0.4) {
+            recommendations.push('🔊 Practice pronunciation carefully - this word has complex sounds');
+        }
+
+        if (factors.semantic > 0.4) {
+            recommendations.push('🧠 Study multiple contexts - this word has abstract or specialized meaning');
+        }
+
+        if (factors.orthographic > 0.3) {
+            recommendations.push('✍️ Practice spelling - this word has unusual letter patterns');
+        }
+
+        if (overallScore > 0.7) {
+            recommendations.push('⭐ Advanced vocabulary - consider using spaced repetition for retention');
+        }
+
+        return recommendations;
+    }
+
+    /**
+     * Get specific learning tips based on word characteristics
+     * @param {string} word - Word to analyze
+     * @param {Object} factors - Difficulty factors
+     * @returns {Object} Learning tips organized by category
+     */
+    getLearningTips(word, factors) {
+        const tips = {
+            pronunciation: [],
+            spelling: [],
+            usage: [],
+            memory: []
+        };
+
+        // Pronunciation tips
+        if (factors.phonological > 0.3) {
+            tips.pronunciation.push('Listen to native speaker pronunciation');
+            tips.pronunciation.push('Break word into syllables for practice');
+        }
+
+        // Spelling tips
+        if (factors.orthographic > 0.3) {
+            tips.spelling.push('Write the word multiple times');
+            tips.spelling.push('Look for patterns in similar words');
+        }
+
+        // Usage tips
+        if (factors.semantic > 0.4) {
+            tips.usage.push('Read the word in different contexts');
+            tips.usage.push('Create your own example sentences');
+        }
+
+        // Memory tips
+        if (factors.morphological > 0.3) {
+            tips.memory.push('Connect to word family (same root/prefix)');
+            tips.memory.push('Create visual or story associations');
+        }
+
+        return tips;
     }
 
     /**

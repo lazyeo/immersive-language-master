@@ -1011,6 +1011,7 @@ class WordProcessor {
                     <div class="ilm-word-stats">
                         <span class="ilm-difficulty-badge difficulty-${wordInfo.difficulty.toLowerCase()}">${wordInfo.difficulty}</span>
                         <span class="ilm-level-badge">${wordInfo.level}</span>
+                        <span class="ilm-cefr-badge cefr-${this.getCEFRFromLevel(wordInfo.level)}" title="Common European Framework Level">${this.getCEFRFromLevel(wordInfo.level)}</span>
                     </div>
                     <button class="ilm-enhanced-close">&times;</button>
                 </div>
@@ -1037,6 +1038,8 @@ class WordProcessor {
                 ${synonymsSection}
                 ${collocationsSection}
                 ${examplesSection}
+
+                ${this.generateDifficultyAnalysisSection(wordInfo)}
 
                 ${wordInfo.etymology.origin !== 'Unknown' ? `
                     <div class="ilm-etymology">
@@ -1191,6 +1194,33 @@ class WordProcessor {
         if (showMoreBtn) {
             showMoreBtn.addEventListener('click', () => {
                 this.showAllExamples(popup, wordInfo);
+            });
+        }
+
+        // Difficulty analysis toggle
+        const analysisToggle = popup.querySelector('.ilm-analysis-toggle');
+        const analysisDetails = popup.querySelector('.ilm-difficulty-details');
+        
+        if (analysisToggle && analysisDetails) {
+            analysisToggle.addEventListener('click', () => {
+                const isExpanded = analysisToggle.dataset.expanded === 'true';
+                
+                if (isExpanded) {
+                    // Hide details
+                    analysisDetails.style.display = 'none';
+                    analysisToggle.textContent = 'Show Details';
+                    analysisToggle.dataset.expanded = 'false';
+                } else {
+                    // Show details
+                    analysisDetails.style.display = 'block';
+                    analysisToggle.textContent = 'Hide Details';
+                    analysisToggle.dataset.expanded = 'true';
+                    
+                    // Animate the factor bars
+                    setTimeout(() => {
+                        this.animateFactorBars(popup);
+                    }, 50);
+                }
             });
         }
     }
@@ -1396,6 +1426,69 @@ class WordProcessor {
             // Re-setup event handlers for new examples
             this.setupNewExampleEvents(popup);
         }
+    }
+
+    /**
+     * Animate difficulty factor bars for visual appeal
+     * @param {HTMLElement} popup - Popup element containing factor bars
+     */
+    animateFactorBars(popup) {
+        const factorBars = popup.querySelectorAll('.ilm-factor-fill');
+        
+        factorBars.forEach((bar, index) => {
+            const targetWidth = bar.style.width;
+            bar.style.width = '0%';
+            bar.style.transition = 'width 0.8s ease-out';
+            
+            setTimeout(() => {
+                bar.style.width = targetWidth;
+            }, index * 100); // Stagger animation
+        });
+
+        // Animate the score circle
+        const scoreCircle = popup.querySelector('.ilm-score-circle');
+        if (scoreCircle) {
+            const scoreValue = parseInt(scoreCircle.dataset.score);
+            this.animateScoreCircle(scoreCircle, scoreValue);
+        }
+    }
+
+    /**
+     * Animate circular score display
+     * @param {HTMLElement} scoreElement - Score circle element
+     * @param {number} targetScore - Target score percentage (0-100)
+     */
+    animateScoreCircle(scoreElement, targetScore) {
+        const scoreFill = scoreElement.querySelector('.ilm-score-fill');
+        const scoreText = scoreElement.querySelector('.ilm-score-text');
+        
+        if (!scoreFill || !scoreText) return;
+
+        let currentScore = 0;
+        const duration = 1500; // 1.5 seconds
+        const increment = targetScore / (duration / 16); // 60fps
+        
+        const animate = () => {
+            currentScore = Math.min(currentScore + increment, targetScore);
+            
+            // Update circular progress
+            const degrees = (currentScore / 100) * 360;
+            scoreFill.style.background = `conic-gradient(
+                #38b2ac 0deg,
+                #38b2ac ${degrees}deg,
+                #e2e8f0 ${degrees}deg,
+                #e2e8f0 360deg
+            )`;
+            
+            // Update text
+            scoreText.textContent = `${Math.round(currentScore)}%`;
+            
+            if (currentScore < targetScore) {
+                requestAnimationFrame(animate);
+            }
+        };
+        
+        requestAnimationFrame(animate);
     }
 
     /**
@@ -1704,6 +1797,176 @@ class WordProcessor {
         document.querySelectorAll('[data-ilm-processed="error"]').forEach(el => {
             el.removeAttribute('data-ilm-processed');
         });
+    }
+
+    /**
+     * Extract CEFR level from level description
+     * @param {string} levelDescription - Level description (e.g., "B2 (Medium Frequency)")
+     * @returns {string} CEFR level (e.g., "B2")
+     */
+    getCEFRFromLevel(levelDescription) {
+        if (!levelDescription) return 'B1'; // Default fallback
+        const match = levelDescription.match(/^([ABC][12])/);
+        return match ? match[1] : 'B1';
+    }
+
+    /**
+     * Generate detailed difficulty analysis section for enhanced popup
+     * @param {Object} wordInfo - Enhanced word information
+     * @returns {string} HTML for difficulty analysis section
+     */
+    generateDifficultyAnalysisSection(wordInfo) {
+        // Get detailed breakdown if available
+        const difficultyBreakdown = window.translationService ? 
+            window.translationService.getDifficultyBreakdown(wordInfo.word) : 
+            null;
+
+        if (!difficultyBreakdown) {
+            return ''; // No detailed analysis available
+        }
+
+        const { overall, factors, recommendations, learningTips } = difficultyBreakdown;
+
+        return `
+            <div class="ilm-difficulty-analysis">
+                <div class="ilm-difficulty-analysis-header">
+                    <h4 class="ilm-difficulty-analysis-title">📊 Difficulty Analysis</h4>
+                    <button class="ilm-analysis-toggle" data-expanded="false">Show Details</button>
+                </div>
+                
+                <div class="ilm-difficulty-summary">
+                    <div class="ilm-difficulty-score">
+                        <div class="ilm-score-circle" data-score="${(overall.score * 100).toFixed(0)}">
+                            <div class="ilm-score-fill" style="--score: ${overall.score * 100}%"></div>
+                            <div class="ilm-score-text">${(overall.score * 100).toFixed(0)}%</div>
+                        </div>
+                        <div class="ilm-score-label">Difficulty Score</div>
+                    </div>
+                    
+                    <div class="ilm-cefr-info">
+                        <div class="ilm-cefr-level-display cefr-${overall.cefrLevel}">${overall.cefrLevel}</div>
+                        <div class="ilm-cefr-description">${this.getCEFRDescription(overall.cefrLevel)}</div>
+                    </div>
+                </div>
+
+                <div class="ilm-difficulty-details" style="display: none;">
+                    <div class="ilm-factors-breakdown">
+                        <h5>📈 Complexity Factors:</h5>
+                        <div class="ilm-factors-grid">
+                            <div class="ilm-factor-item">
+                                <div class="ilm-factor-name">📊 Frequency</div>
+                                <div class="ilm-factor-bar">
+                                    <div class="ilm-factor-fill" style="width: ${factors.frequency * 100}%"></div>
+                                </div>
+                                <div class="ilm-factor-score">${(factors.frequency * 100).toFixed(0)}%</div>
+                            </div>
+                            
+                            <div class="ilm-factor-item">
+                                <div class="ilm-factor-name">🔬 Structure</div>
+                                <div class="ilm-factor-bar">
+                                    <div class="ilm-factor-fill" style="width: ${factors.morphological * 100}%"></div>
+                                </div>
+                                <div class="ilm-factor-score">${(factors.morphological * 100).toFixed(0)}%</div>
+                            </div>
+                            
+                            <div class="ilm-factor-item">
+                                <div class="ilm-factor-name">🔊 Pronunciation</div>
+                                <div class="ilm-factor-bar">
+                                    <div class="ilm-factor-fill" style="width: ${factors.phonological * 100}%"></div>
+                                </div>
+                                <div class="ilm-factor-score">${(factors.phonological * 100).toFixed(0)}%</div>
+                            </div>
+                            
+                            <div class="ilm-factor-item">
+                                <div class="ilm-factor-name">🧠 Meaning</div>
+                                <div class="ilm-factor-bar">
+                                    <div class="ilm-factor-fill" style="width: ${factors.semantic * 100}%"></div>
+                                </div>
+                                <div class="ilm-factor-score">${(factors.semantic * 100).toFixed(0)}%</div>
+                            </div>
+                            
+                            <div class="ilm-factor-item">
+                                <div class="ilm-factor-name">✍️ Spelling</div>
+                                <div class="ilm-factor-bar">
+                                    <div class="ilm-factor-fill" style="width: ${factors.orthographic * 100}%"></div>
+                                </div>
+                                <div class="ilm-factor-score">${(factors.orthographic * 100).toFixed(0)}%</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    ${recommendations.length > 0 ? `
+                        <div class="ilm-learning-recommendations">
+                            <h5>💡 Learning Recommendations:</h5>
+                            <ul class="ilm-recommendations-list">
+                                ${recommendations.map(rec => `<li class="ilm-recommendation-item">${rec}</li>`).join('')}
+                            </ul>
+                        </div>
+                    ` : ''}
+
+                    ${Object.keys(learningTips).some(key => learningTips[key].length > 0) ? `
+                        <div class="ilm-learning-tips">
+                            <h5>🎯 Specific Tips:</h5>
+                            <div class="ilm-tips-grid">
+                                ${learningTips.pronunciation.length > 0 ? `
+                                    <div class="ilm-tip-category">
+                                        <div class="ilm-tip-title">🔊 Pronunciation</div>
+                                        <ul class="ilm-tip-list">
+                                            ${learningTips.pronunciation.map(tip => `<li>${tip}</li>`).join('')}
+                                        </ul>
+                                    </div>
+                                ` : ''}
+                                
+                                ${learningTips.spelling.length > 0 ? `
+                                    <div class="ilm-tip-category">
+                                        <div class="ilm-tip-title">✍️ Spelling</div>
+                                        <ul class="ilm-tip-list">
+                                            ${learningTips.spelling.map(tip => `<li>${tip}</li>`).join('')}
+                                        </ul>
+                                    </div>
+                                ` : ''}
+                                
+                                ${learningTips.usage.length > 0 ? `
+                                    <div class="ilm-tip-category">
+                                        <div class="ilm-tip-title">💬 Usage</div>
+                                        <ul class="ilm-tip-list">
+                                            ${learningTips.usage.map(tip => `<li>${tip}</li>`).join('')}
+                                        </ul>
+                                    </div>
+                                ` : ''}
+                                
+                                ${learningTips.memory.length > 0 ? `
+                                    <div class="ilm-tip-category">
+                                        <div class="ilm-tip-title">🧠 Memory</div>
+                                        <ul class="ilm-tip-list">
+                                            ${learningTips.memory.map(tip => `<li>${tip}</li>`).join('')}
+                                        </ul>
+                                    </div>
+                                ` : ''}
+                            </div>
+                        </div>
+                    ` : ''}
+                </div>
+            </div>
+        `;
+    }
+
+    /**
+     * Get CEFR level description
+     * @param {string} level - CEFR level (A1, A2, B1, B2, C1, C2)
+     * @returns {string} Description of the CEFR level
+     */
+    getCEFRDescription(level) {
+        const descriptions = {
+            'A1': 'Beginner - Basic survival vocabulary',
+            'A2': 'Elementary - Everyday situations',
+            'B1': 'Intermediate - Familiar topics',
+            'B2': 'Upper-Intermediate - Complex topics',
+            'C1': 'Advanced - Nuanced communication',
+            'C2': 'Proficient - Near-native level'
+        };
+        
+        return descriptions[level] || 'Intermediate level';
     }
 
     /**
