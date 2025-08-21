@@ -438,10 +438,11 @@ class WordProcessor {
     }
 
     /**
-     * Mark word as known
+     * Mark word as known with enhanced learning manager integration
      * @param {string} word - Word to mark as known
+     * @param {Object} context - Additional context for learning record
      */
-    async markWordAsKnown(word) {
+    async markWordAsKnown(word, context = {}) {
         this.knownWords.add(word);
         this.learningWords.delete(word);
         
@@ -449,6 +450,15 @@ class WordProcessor {
             knownWords: Array.from(this.knownWords),
             learningWords: Array.from(this.learningWords)
         });
+
+        // Update learning manager if available
+        if (window.ilmLearningManager) {
+            await window.ilmLearningManager.updateLearningRecord(word, 'marked_known', {
+                ...context,
+                source: 'word_processor',
+                url: window.location.href
+            });
+        }
 
         // Notify background script
         chrome.runtime.sendMessage({
@@ -458,10 +468,11 @@ class WordProcessor {
     }
 
     /**
-     * Mark word as learning
+     * Mark word as learning with enhanced learning manager integration
      * @param {string} word - Word to mark as learning
+     * @param {Object} context - Additional context for learning record
      */
-    async markWordAsLearning(word) {
+    async markWordAsLearning(word, context = {}) {
         this.learningWords.add(word);
         this.knownWords.delete(word);
         
@@ -469,6 +480,15 @@ class WordProcessor {
             knownWords: Array.from(this.knownWords),
             learningWords: Array.from(this.learningWords)
         });
+
+        // Update learning manager if available
+        if (window.ilmLearningManager) {
+            await window.ilmLearningManager.updateLearningRecord(word, 'added_to_learning', {
+                ...context,
+                source: 'word_processor',
+                url: window.location.href
+            });
+        }
 
         // Notify background script
         chrome.runtime.sendMessage({
@@ -1104,6 +1124,7 @@ class WordProcessor {
 
                 <div class="ilm-enhanced-actions">
                     <button class="ilm-btn ilm-btn-secondary" onclick="this.closest('.ilm-enhanced-popup').remove()">Close</button>
+                    <button class="ilm-btn ilm-btn-bookmark" data-word="${wordInfo.word}" onclick="window.ilmWordProcessor.bookmarkWordFromPopup('${wordInfo.word}', this);">📖 Bookmark</button>
                     <button class="ilm-btn ilm-btn-primary" data-word="${wordInfo.word}" onclick="window.ilmWordProcessor.markWordAsLearning('${wordInfo.word}'); this.textContent='Added ✓';">Add to Learning</button>
                     <button class="ilm-btn ilm-btn-success" data-word="${wordInfo.word}" onclick="window.ilmWordProcessor.markWordAsKnown('${wordInfo.word}'); this.textContent='Marked Known ✓';">Mark as Known</button>
                 </div>
@@ -1967,6 +1988,209 @@ class WordProcessor {
         };
         
         return descriptions[level] || 'Intermediate level';
+    }
+
+    /**
+     * Bookmark word from enhanced popup with comprehensive context
+     * @param {string} word - Word to bookmark
+     * @param {HTMLElement} button - Button element that triggered the action
+     */
+    async bookmarkWordFromPopup(word, button) {
+        try {
+            if (!window.ilmLearningManager) {
+                this.showTemporaryFeedback(button, '❌ Learning Manager not available', 'error');
+                return;
+            }
+
+            // Disable button and show loading state
+            const originalText = button.textContent;
+            button.disabled = true;
+            button.textContent = '⏳ Bookmarking...';
+
+            // Get enhanced context from the popup
+            const popup = button.closest('.ilm-enhanced-popup');
+            const context = this.extractBookmarkContextFromPopup(popup, word);
+
+            // Create bookmark using learning manager
+            const result = await window.ilmLearningManager.bookmarkWord(word, context);
+
+            if (result.success) {
+                button.textContent = '📖 Bookmarked ✓';
+                button.classList.remove('ilm-btn-bookmark');
+                button.classList.add('ilm-btn-success');
+                this.showTemporaryFeedback(button, '✓ Word bookmarked successfully!', 'success');
+                
+                // Update button action to remove bookmark
+                button.onclick = () => this.removeBookmarkFromPopup(word, button);
+            } else {
+                throw new Error(result.message || 'Bookmark creation failed');
+            }
+
+        } catch (error) {
+            console.error('❌ ILM: Bookmark creation failed:', error);
+            button.textContent = originalText;
+            button.disabled = false;
+            this.showTemporaryFeedback(button, '❌ Bookmark failed', 'error');
+        }
+    }
+
+    /**
+     * Extract comprehensive bookmark context from enhanced popup
+     * @param {HTMLElement} popup - Enhanced popup element
+     * @param {string} word - Target word
+     * @returns {Object} Bookmark context
+     */
+    extractBookmarkContextFromPopup(popup, word) {
+        const context = {
+            originalCase: word,
+            source: 'enhanced_popup',
+            url: window.location.href,
+            timestamp: Date.now()
+        };
+
+        try {
+            // Extract difficulty and CEFR level
+            const difficultyBadge = popup.querySelector('.ilm-difficulty-badge');
+            if (difficultyBadge) {
+                context.difficulty = difficultyBadge.textContent.trim();
+            }
+
+            const cefrBadge = popup.querySelector('.ilm-cefr-badge');
+            if (cefrBadge) {
+                context.cefrLevel = cefrBadge.textContent.trim();
+            }
+
+            // Extract primary definition
+            const primaryDefinition = popup.querySelector('.ilm-definition-item.active .ilm-definition-text');
+            if (primaryDefinition) {
+                context.translation = primaryDefinition.textContent.trim();
+            }
+
+            // Extract part of speech
+            const posTag = popup.querySelector('.ilm-pos-tag');
+            if (posTag) {
+                context.category = posTag.textContent.trim();
+            }
+
+            // Extract pronunciation
+            const pronunciation = popup.querySelector('.ilm-pronunciation-ipa');
+            if (pronunciation) {
+                context.pronunciation = pronunciation.textContent.trim();
+            }
+
+            // Extract example sentences
+            const examples = popup.querySelectorAll('.ilm-example-sentence');
+            if (examples.length > 0) {
+                context.examples = Array.from(examples)
+                    .slice(0, 3) // Limit to first 3 examples
+                    .map(ex => ex.textContent.replace(/\s+/g, ' ').trim());
+            }
+
+            // Extract related words
+            const synonyms = popup.querySelector('.ilm-relation-words');
+            if (synonyms) {
+                context.relatedWords = synonyms.textContent.split(',').map(s => s.trim()).slice(0, 5);
+            }
+
+            // Extract common phrases
+            const collocations = popup.querySelectorAll('.ilm-collocation-item');
+            if (collocations.length > 0) {
+                context.tags = Array.from(collocations)
+                    .slice(0, 3)
+                    .map(col => col.textContent.trim());
+            }
+
+            // Extract page context (sentence containing the word)
+            const selection = window.getSelection();
+            if (selection.rangeCount > 0) {
+                const selectedText = selection.toString().trim();
+                if (selectedText.toLowerCase().includes(word.toLowerCase())) {
+                    context.sentence = selectedText;
+                }
+            }
+
+        } catch (error) {
+            console.warn('❌ ILM: Context extraction partially failed:', error);
+        }
+
+        return context;
+    }
+
+    /**
+     * Remove bookmark from popup
+     * @param {string} word - Word to remove from bookmarks
+     * @param {HTMLElement} button - Button element
+     */
+    async removeBookmarkFromPopup(word, button) {
+        try {
+            if (!window.ilmLearningManager) {
+                this.showTemporaryFeedback(button, '❌ Learning Manager not available', 'error');
+                return;
+            }
+
+            // Find and remove bookmark
+            const bookmarks = window.ilmLearningManager.bookmarkedWords;
+            const bookmarkToRemove = Array.from(bookmarks.entries())
+                .find(([id, bookmark]) => bookmark.word === word.toLowerCase());
+
+            if (bookmarkToRemove) {
+                const [bookmarkId] = bookmarkToRemove;
+                bookmarks.delete(bookmarkId);
+                await window.ilmLearningManager.saveData();
+
+                // Update button state
+                button.textContent = '📖 Bookmark';
+                button.classList.remove('ilm-btn-success');
+                button.classList.add('ilm-btn-bookmark');
+                button.onclick = () => this.bookmarkWordFromPopup(word, button);
+                
+                this.showTemporaryFeedback(button, '✓ Bookmark removed', 'info');
+            }
+
+        } catch (error) {
+            console.error('❌ ILM: Bookmark removal failed:', error);
+            this.showTemporaryFeedback(button, '❌ Removal failed', 'error');
+        }
+    }
+
+    /**
+     * Check if word is already bookmarked
+     * @param {string} word - Word to check
+     * @returns {boolean} True if word is bookmarked
+     */
+    isWordBookmarked(word) {
+        if (!window.ilmLearningManager) return false;
+        
+        const bookmarks = window.ilmLearningManager.bookmarkedWords;
+        return Array.from(bookmarks.values())
+            .some(bookmark => bookmark.word === word.toLowerCase());
+    }
+
+    /**
+     * Get learning statistics for display
+     * @returns {Object} Learning statistics
+     */
+    getLearningStatistics() {
+        if (!window.ilmLearningManager) {
+            return {
+                totalBookmarks: 0,
+                totalStudySessions: 0,
+                currentStreak: 0,
+                wordsForReview: 0
+            };
+        }
+
+        const stats = window.ilmLearningManager.getLearningStatistics();
+        const reviewWords = window.ilmLearningManager.getWordsForReview();
+        
+        return {
+            totalBookmarks: stats.overview.totalBookmarks,
+            totalStudySessions: stats.overview.totalStudySessions,
+            currentStreak: stats.overview.currentStreak,
+            wordsForReview: reviewWords.length,
+            todayStudied: stats.recent.todayStudied,
+            weekStudied: stats.recent.weekStudied
+        };
     }
 
     /**

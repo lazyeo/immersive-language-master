@@ -72,13 +72,23 @@ class UniversalProcessor {
     }
 
     async waitForDependencies() {
-        // Wait for text analyzer and word processor to be ready
-        const maxWaitTime = 5000; // 5 seconds
+        // Load core dependencies first
+        await this.loadScript('services/translation-service.js');
+        await this.loadScript('core/text-analyzer.js');
+        await this.loadScript('core/word-processor.js');
+        
+        // Load learning management system
+        await this.loadScript('services/learning-manager.js');
+        await this.loadScript('components/learning-dashboard.js');
+
+        // Wait for all components to be ready
+        const maxWaitTime = 8000; // Increased timeout for more dependencies
         const startTime = Date.now();
         
-        while (!window.ilmTextAnalyzer || !window.ilmWordProcessor) {
+        while (!window.ilmTextAnalyzer || !window.ilmWordProcessor || !window.ilmLearningManager) {
             if (Date.now() - startTime > maxWaitTime) {
-                throw new Error('Dependencies not loaded within timeout');
+                console.warn('⚠️ ILM: Some dependencies not loaded within timeout');
+                break; // Continue with available dependencies
             }
             await new Promise(resolve => setTimeout(resolve, 100));
         }
@@ -443,6 +453,33 @@ class UniversalProcessor {
         }
 
         this.processedElements.clear();
+    }
+
+    /**
+     * Load external script file
+     * @param {string} scriptPath - Path to script file relative to extension root
+     * @returns {Promise} Promise that resolves when script is loaded
+     */
+    async loadScript(scriptPath) {
+        return new Promise((resolve, reject) => {
+            const script = document.createElement('script');
+            script.src = chrome.runtime.getURL(scriptPath);
+            
+            script.onload = () => {
+                script.remove(); // Remove script element after loading to keep DOM clean
+                console.log(`✅ ILM: Loaded ${scriptPath}`);
+                resolve();
+            };
+            
+            script.onerror = () => {
+                script.remove();
+                console.error(`❌ ILM: Failed to load ${scriptPath}`);
+                reject(new Error(`Failed to load ${scriptPath}`));
+            };
+            
+            // Inject into page context
+            (document.head || document.documentElement).appendChild(script);
+        });
     }
 }
 

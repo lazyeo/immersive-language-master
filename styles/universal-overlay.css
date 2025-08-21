@@ -1686,6 +1686,16 @@
     box-shadow: 0 4px 12px rgba(72, 187, 120, 0.3);
 }
 
+.ilm-btn-bookmark {
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    color: white;
+}
+
+.ilm-btn-bookmark:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+}
+
 @keyframes ilm-fade-in {
     from { opacity: 0; transform: translateY(10px); }
     to { opacity: 1; transform: translateY(0); }

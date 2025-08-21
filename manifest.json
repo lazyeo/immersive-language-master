@@ -95,6 +95,8 @@
         "data/*.json", 
         "styles/*.css", 
         "core/*.js",
+        "services/*.js",
+        "components/*.js",
         "ui/components/*.js",
         "assets/*"
       ],
