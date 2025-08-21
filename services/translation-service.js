@@ -95,6 +95,35 @@ class TranslationService {
             return this.cache.get(cacheKey);
         }
 
+        // Use multi-language translator if available
+        if (window.ilmMultiLanguageTranslator) {
+            try {
+                const result = await window.ilmMultiLanguageTranslator.translate(text, {
+                    to: options.targetLanguage || this.settings.targetLanguage,
+                    from: options.from || 'auto',
+                    context: options.context || '',
+                    provider: options.provider || this.settings.provider,
+                    includeAlternatives: options.includeAlternatives !== false
+                });
+                
+                // Cache the result using our local cache
+                if (result.success) {
+                    const legacyResult = {
+                        text: result.translation,
+                        provider: result.provider,
+                        detectedLanguage: result.detectedLanguage || result.sourceLanguage,
+                        alternatives: result.alternatives,
+                        confidence: result.confidence
+                    };
+                    this.cache.set(cacheKey, legacyResult);
+                    return legacyResult;
+                }
+            } catch (error) {
+                console.warn('🌐 Multi-language translator failed, falling back to legacy providers:', error);
+            }
+        }
+
+        // Fallback to legacy provider system
         const provider = options.provider || this.settings.provider;
         const targetLang = options.targetLanguage || this.settings.targetLanguage;
 
