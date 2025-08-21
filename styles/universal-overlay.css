@@ -78,6 +78,8 @@
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
     animation: ilm-tooltip-show 0.2s ease;
     backdrop-filter: blur(10px);
+    pointer-events: auto; /* Ensure tooltip can receive mouse events */
+    user-select: none;
 }
 
 .ilm-tooltip::before {
@@ -101,6 +103,46 @@
 .ilm-tooltip-translation {
     font-size: 13px;
     opacity: 0.9;
+}
+
+/* Enhanced tooltip styles for better interactivity */
+.ilm-tooltip-enhanced {
+    max-width: 320px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.ilm-tooltip-enhanced .ilm-tooltip-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.ilm-tooltip-btn {
+    padding: 4px 8px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    border-radius: 4px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.ilm-tooltip-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+    border-color: rgba(255, 255, 255, 0.4);
+    transform: translateY(-1px);
+}
+
+/* Ensure tooltips don't interfere with page interactions when not needed */
+.ilm-tooltip:not(:hover) {
+    pointer-events: none;
+}
+
+.ilm-tooltip:hover {
+    pointer-events: auto;
 }
 
 /* ============================================
@@ -2577,6 +2619,23 @@
         background: linear-gradient(135deg, #1a202c, #2d3748);
     }
     
+    /* Selection Menu Dark Mode Styles */
+    .ilm-selection-menu {
+        background: #1a202c;
+        border: 1px solid #4a5568;
+        color: #e2e8f0;
+    }
+    
+    .ilm-selection-btn {
+        color: #e2e8f0;
+        border-color: transparent;
+    }
+    
+    .ilm-selection-btn:hover {
+        background: rgba(56, 178, 172, 0.2);
+        color: #81e6d9;
+    }
+    
     .ilm-preview-content {
         background: #1a202c;
         color: #e2e8f0;
@@ -2587,12 +2646,57 @@
         border-color: #4a5568;
     }
     
+    .ilm-preview-words h3 {
+        color: #e2e8f0;
+    }
+    
     .ilm-word-card {
         background: #2d3748;
         color: #e2e8f0;
+        border: 1px solid #4a5568;
     }
     
     .ilm-word-card:hover {
         background: #4a5568;
+        border-color: #718096;
+    }
+    
+    .ilm-word-main {
+        color: #e2e8f0;
+    }
+    
+    .ilm-word-freq {
+        color: #a0aec0;
+    }
+    
+    .ilm-word-translation {
+        color: #cbd5e0;
+    }
+    
+    .ilm-word-know {
+        background: #2d5a5a;
+        color: #81e6d9;
+        border-color: #38b2ac;
+    }
+    
+    .ilm-word-know:hover {
+        background: #38b2ac;
+        color: white;
+    }
+    
+    .ilm-word-learn {
+        background: #553c00;
+        color: #f6ad55;
+        border-color: #ed8936;
+    }
+    
+    .ilm-word-learn:hover {
+        background: #ed8936;
+        color: white;
+    }
+    
+    .ilm-preview-actions {
+        background: #2d3748;
+        border-color: #4a5568;
     }
 }

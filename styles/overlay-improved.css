@@ -99,30 +99,29 @@
     box-shadow: 0 4px 12px rgba(220, 53, 69, 0.4);
 }
 
-/* Known words in show-all mode (faded appearance) */
+/* Known words (subtle styling that doesn't disrupt reading) */
 .ela-known-word {
-    color: rgba(255, 255, 255, 0.4);
-    padding: 2px 6px;
-    border-radius: 4px;
-    margin: 0 2px;
+    color: rgba(255, 255, 255, 0.85);
     cursor: pointer;
-    opacity: 0.6;
+    opacity: 0.8;
     transition: all 0.2s ease;
-    background: rgba(108, 117, 125, 0.1);
-    border: 1px solid rgba(108, 117, 125, 0.2);
+    text-decoration: none;
+    border-bottom: 1px dotted rgba(108, 117, 125, 0.3);
 }
 
 .ela-known-word:hover {
-    opacity: 0.8;
-    color: rgba(255, 255, 255, 0.7);
-    background: rgba(108, 117, 125, 0.2);
-    border-color: rgba(108, 117, 125, 0.4);
-    transform: scale(1.02);
+    opacity: 1;
+    color: rgba(255, 255, 255, 0.95);
+    border-bottom-color: rgba(108, 117, 125, 0.6);
+    background: rgba(108, 117, 125, 0.1);
+    border-radius: 3px;
+    padding: 1px 3px;
+    margin: 0 1px;
 }
 
 .ela-known-word:active {
     opacity: 0.9;
-    transform: scale(1);
+    transform: none;
 }
 
 /* Hidden words (shown as ___) - unified gray style */
@@ -1132,5 +1131,504 @@
     .ela-btn:hover,
     .ela-immersive-button:hover {
         transform: none;
+    }
+}
+
+/* =================================================================== */
+/* ILM (Immersive Language Master) Enhanced Tooltip Styles */
+/* =================================================================== */
+
+/* ILM Enhanced Tooltip Container */
+.ilm-tooltip {
+    position: fixed;
+    z-index: 10000;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    border-radius: 8px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15), 0 4px 8px rgba(0, 0, 0, 0.1);
+    user-select: none;
+    pointer-events: auto;
+    
+    /* Animation */
+    animation: ilmTooltipSlideIn 0.25s ease-out;
+    
+    /* Backdrop filter for modern glass effect */
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+/* Simple tooltip for basic words */
+.ilm-tooltip-simple {
+    background: rgba(45, 55, 72, 0.95);
+    color: white;
+    padding: 8px 12px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    max-width: 200px;
+}
+
+/* Enhanced tooltip for unknown words */
+.ilm-tooltip-enhanced {
+    background: rgba(255, 255, 255, 0.98);
+    color: #2d3748;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    max-width: 320px;
+    min-width: 280px;
+    overflow: hidden;
+}
+
+/* Tooltip Header */
+.ilm-tooltip-header {
+    padding: 12px 16px 8px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+    background: linear-gradient(135deg, #48bb78 0%, #38b2ac 100%);
+    color: white;
+}
+
+.ilm-tooltip-word {
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 2px;
+    letter-spacing: 0.5px;
+}
+
+.ilm-tooltip-pronunciation {
+    font-size: 12px;
+    opacity: 0.9;
+    font-family: 'Courier New', monospace;
+}
+
+/* Tooltip Content */
+.ilm-tooltip-content {
+    padding: 12px 16px;
+}
+
+.ilm-tooltip-translation {
+    font-size: 14px;
+    line-height: 1.4;
+    color: #2d3748;
+    margin-bottom: 8px;
+}
+
+.ilm-tooltip-pos {
+    font-size: 11px;
+    color: #718096;
+    font-style: italic;
+    margin-bottom: 6px;
+    text-transform: lowercase;
+}
+
+.ilm-tooltip-example {
+    font-size: 12px;
+    color: #4a5568;
+    font-style: italic;
+    background: rgba(237, 242, 247, 0.8);
+    padding: 6px 8px;
+    border-radius: 4px;
+    border-left: 3px solid #48bb78;
+    margin-top: 6px;
+}
+
+/* Tooltip Actions */
+.ilm-tooltip-actions {
+    padding: 8px 12px 12px;
+    display: flex;
+    gap: 8px;
+    background: rgba(247, 250, 252, 0.8);
+    border-top: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.ilm-tooltip-btn {
+    flex: 1;
+    padding: 6px 12px;
+    border: none;
+    border-radius: 5px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-family: inherit;
+}
+
+.ilm-tooltip-btn:first-child {
+    background: #48bb78;
+    color: white;
+}
+
+.ilm-tooltip-btn:first-child:hover {
+    background: #38a169;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(72, 187, 120, 0.3);
+}
+
+.ilm-tooltip-btn:last-child {
+    background: #4299e1;
+    color: white;
+}
+
+.ilm-tooltip-btn:last-child:hover {
+    background: #3182ce;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(66, 153, 225, 0.3);
+}
+
+/* ILM Word Highlighting Styles */
+.ilm-word {
+    transition: all 0.2s ease;
+    cursor: pointer;
+    border-radius: 3px;
+    padding: 1px 3px;
+    margin: 0 1px;
+}
+
+.ilm-word-unknown {
+    background: linear-gradient(135deg, #48bb78 0%, #38b2ac 100%);
+    color: white;
+    font-weight: 500;
+    box-shadow: 0 2px 4px rgba(72, 187, 120, 0.2);
+}
+
+.ilm-word-unknown:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(72, 187, 120, 0.3);
+}
+
+.ilm-word-learning {
+    background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%);
+    color: white;
+    font-weight: 500;
+    box-shadow: 0 2px 4px rgba(66, 153, 225, 0.2);
+}
+
+.ilm-word-learning:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(66, 153, 225, 0.3);
+}
+
+.ilm-word-known {
+    color: rgba(45, 55, 72, 0.85);
+    cursor: pointer;
+    opacity: 0.9;
+    transition: all 0.2s ease;
+    /* Remove distracting underline - use subtle background instead */
+    background: rgba(72, 187, 120, 0.05);
+    border-radius: 2px;
+    padding: 1px 2px;
+    margin: 0 1px;
+}
+
+.ilm-word-known:hover {
+    opacity: 1;
+    color: rgba(45, 55, 72, 0.95);
+    background: rgba(72, 187, 120, 0.1);
+    transform: translateY(-0.5px);
+}
+
+.ilm-word-hidden {
+    background: rgba(113, 128, 150, 0.15);
+    color: #718096;
+    font-style: italic;
+    border: 1px dashed rgba(113, 128, 150, 0.3);
+}
+
+.ilm-word-hidden:hover {
+    background: rgba(113, 128, 150, 0.25);
+    color: #4a5568;
+    border-color: rgba(113, 128, 150, 0.5);
+}
+
+/* Tooltip Animations */
+@keyframes ilmTooltipSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@keyframes ilmTooltipSlideOut {
+    from {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+    to {
+        opacity: 0;
+        transform: translateY(-10px) scale(0.95);
+    }
+}
+
+/* Dark Mode Support for ILM */
+@media (prefers-color-scheme: dark) {
+    .ilm-word-known {
+        color: rgba(226, 232, 240, 0.85);
+        background: rgba(72, 187, 120, 0.1);
+    }
+    
+    .ilm-word-known:hover {
+        color: rgba(226, 232, 240, 0.95);
+        background: rgba(72, 187, 120, 0.15);
+        transform: translateY(-0.5px);
+    }
+    
+    .ilm-tooltip-enhanced {
+        background: rgba(26, 32, 44, 0.98);
+        color: #e2e8f0;
+        border-color: rgba(255, 255, 255, 0.1);
+    }
+    
+    .ilm-tooltip-simple {
+        background: rgba(26, 32, 44, 0.98);
+        color: #e2e8f0;
+    }
+    
+    .ilm-tooltip-header {
+        background: linear-gradient(135deg, #38a169 0%, #319795 100%);
+        border-bottom-color: rgba(255, 255, 255, 0.1);
+    }
+    
+    .ilm-tooltip-content {
+        background: transparent;
+    }
+    
+    .ilm-tooltip-translation {
+        color: #e2e8f0;
+    }
+    
+    .ilm-tooltip-pos {
+        color: #a0aec0;
+    }
+    
+    .ilm-tooltip-example {
+        background: rgba(45, 55, 72, 0.6);
+        color: #cbd5e0;
+        border-left-color: #38a169;
+    }
+    
+    .ilm-tooltip-actions {
+        background: rgba(45, 55, 72, 0.8);
+        border-top-color: rgba(255, 255, 255, 0.1);
+    }
+}
+
+/* High Contrast Mode for ILM */
+@media (prefers-contrast: high) {
+    .ilm-tooltip {
+        border: 2px solid currentColor;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+    }
+    
+    .ilm-tooltip-enhanced {
+        background: white;
+        color: black;
+    }
+    
+    .ilm-tooltip-simple {
+        background: black;
+        color: white;
+    }
+    
+    .ilm-word-unknown {
+        background: #000;
+        color: #fff;
+        border: 2px solid #fff;
+    }
+    
+    .ilm-word-learning {
+        background: #fff;
+        color: #000;
+        border: 2px solid #000;
+    }
+    
+    .ilm-word-hidden {
+        background: transparent;
+        color: #666;
+        border: 2px dashed #666;
+    }
+}
+
+/* Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+    .ilm-tooltip,
+    .ilm-word,
+    .ilm-tooltip-btn {
+        animation: none;
+        transition: none;
+    }
+    
+    .ilm-word-unknown:hover,
+    .ilm-word-learning:hover,
+    .ilm-tooltip-btn:hover {
+        transform: none;
+    }
+}
+
+/* Mobile Responsive Design */
+@media (max-width: 768px) {
+    .ilm-tooltip-enhanced {
+        max-width: 280px;
+        min-width: 240px;
+        font-size: 14px;
+    }
+    
+    .ilm-tooltip-word {
+        font-size: 15px;
+    }
+    
+    .ilm-tooltip-translation {
+        font-size: 13px;
+    }
+    
+    .ilm-tooltip-btn {
+        padding: 8px 12px;
+        font-size: 11px;
+    }
+    
+    .ilm-word {
+        padding: 2px 4px;
+        margin: 0 1px;
+    }
+}
+
+/* Additional Utility Classes for ILM */
+.ilm-fade-in {
+    animation: ilmTooltipSlideIn 0.3s ease-out;
+}
+
+.ilm-fade-out {
+    animation: ilmTooltipSlideOut 0.3s ease-out;
+}
+
+.ilm-hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.ilm-visible {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+/* Word interaction feedback */
+.ilm-word-clicked {
+    animation: ilmWordPulse 0.4s ease-out;
+}
+
+@keyframes ilmWordPulse {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+/* =================================================================== */
+/* Processing Indicator Styles */
+/* =================================================================== */
+
+.ilm-processing-indicator {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.8);
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.ilm-processing-indicator.ilm-processing-visible {
+    opacity: 1;
+}
+
+.ilm-processing-indicator.ilm-processing-hiding {
+    opacity: 0;
+}
+
+.ilm-processing-content {
+    background: white;
+    padding: 40px;
+    border-radius: 16px;
+    text-align: center;
+    max-width: 400px;
+    width: 90%;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.ilm-processing-spinner {
+    width: 50px;
+    height: 50px;
+    border: 4px solid #e2e8f0;
+    border-top: 4px solid #48bb78;
+    border-radius: 50%;
+    animation: ilmSpin 1s linear infinite;
+    margin: 0 auto 20px;
+}
+
+@keyframes ilmSpin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.ilm-processing-text {
+    font-size: 18px;
+    font-weight: 600;
+    color: #2d3748;
+    margin-bottom: 20px;
+}
+
+.ilm-progress-bar {
+    width: 100%;
+    height: 8px;
+    background: #e2e8f0;
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 16px;
+}
+
+.ilm-progress-fill {
+    height: 100%;
+    background: linear-gradient(135deg, #48bb78 0%, #38b2ac 100%);
+    border-radius: 4px;
+    transition: width 0.3s ease;
+    width: 0%;
+}
+
+.ilm-processing-tip {
+    font-size: 14px;
+    color: #718096;
+    line-height: 1.4;
+}
+
+/* Dark mode support for processing indicator */
+@media (prefers-color-scheme: dark) {
+    .ilm-processing-content {
+        background: #2d3748;
+    }
+    
+    .ilm-processing-text {
+        color: #e2e8f0;
+    }
+    
+    .ilm-processing-tip {
+        color: #a0aec0;
+    }
+    
+    .ilm-processing-spinner {
+        border-color: #4a5568;
+        border-top-color: #48bb78;
+    }
+    
+    .ilm-progress-bar {
+        background: #4a5568;
     }
 }

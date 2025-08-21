@@ -117,21 +117,67 @@ class WordProcessor {
      */
     shouldSkipElement(element) {
         const skipTags = ['script', 'style', 'input', 'textarea', 'select', 'button', 'code', 'pre'];
-        const skipClasses = ['ilm-tooltip', 'ilm-preview', 'ilm-word-overlay'];
+        const skipClasses = [
+            'ilm-tooltip', 'ilm-preview', 'ilm-word-overlay', 'ilm-definition-popup',
+            'ilm-lookup-popup', 'ilm-enhanced-popup', 'ilm-selection-menu',
+            'ilm-feedback', 'ilm-processing-indicator', 'ilm-modal', 'ilm-popup',
+            'ilm-bilingual-popup', 'ilm-word-card', 'ilm-preview-modal',
+            // Chrome extension elements
+            'extension-popup', 'chrome-extension', 'browser-extension'
+        ];
         
         // Check tag name
         if (skipTags.includes(element.tagName.toLowerCase())) {
             return true;
         }
 
-        // Check classes
-        if (element.className && skipClasses.some(cls => element.className.includes(cls))) {
+        // Check classes - more comprehensive check
+        if (element.className) {
+            const classList = element.className.toString();
+            if (skipClasses.some(cls => classList.includes(cls))) {
+                return true;
+            }
+        }
+
+        // Check for extension-related IDs and attributes
+        if (element.id && (
+            element.id.startsWith('chrome-extension-') ||
+            element.id.startsWith('extension-') ||
+            element.id.includes('ilm-') ||
+            element.id.includes('popup') ||
+            element.id.includes('tooltip')
+        )) {
             return true;
         }
 
-        // Check if element is hidden
+        // Check for extension container attributes
+        if (element.hasAttribute && (
+            element.hasAttribute('data-extension') ||
+            element.hasAttribute('data-chrome-extension') ||
+            element.hasAttribute('data-ilm-popup') ||
+            element.hasAttribute('data-popup')
+        )) {
+            return true;
+        }
+
+        // Check if element is inside a shadow DOM or has shadow root
+        if (element.shadowRoot || element.getRootNode()?.host) {
+            return true;
+        }
+
+        // Check for high z-index elements (likely popups/overlays)
         const style = window.getComputedStyle(element);
         if (style.display === 'none' || style.visibility === 'hidden') {
+            return true;
+        }
+
+        const zIndex = parseInt(style.zIndex);
+        if (!isNaN(zIndex) && zIndex > 9000) {
+            return true;
+        }
+
+        // Check if element is positioned fixed/absolute with high z-index (likely popup)
+        if ((style.position === 'fixed' || style.position === 'absolute') && zIndex > 1000) {
             return true;
         }
 
@@ -246,57 +292,144 @@ class WordProcessor {
         const word = wordInfo.word.toLowerCase();
         const isKnown = this.knownWords.has(word);
         const isLearning = this.learningWords.has(word);
-        const isUnknown = window.ilmTextAnalyzer ? window.ilmTextAnalyzer.isWordUnknown(word) : false;
-
-        // 🚀 PERFORMANCE OPTIMIZATION: Only process words that need highlighting
-        // Skip processing for basic common words unless they're explicitly in learning lists
-        if (!isKnown && !isLearning && !isUnknown && this.isBasicWord(word)) {
-            // Return plain text node for basic words
-            return document.createTextNode(wordInfo.originalCase);
-        }
-
-        // Determine word classification
-        let classification = 'normal';
-        if (isKnown) {
-            classification = 'known';
-        } else if (isLearning) {
-            classification = 'learning';
-        } else if (isUnknown) {
-            classification = 'unknown';
-        }
-
-        // 🚀 PERFORMANCE: Only create special elements for words that need processing
-        if (classification === 'normal' && !this.userSettings.highlightUnknownWords) {
-            return document.createTextNode(wordInfo.originalCase);
-        }
-
-        // Create word element based on display mode and classification
-        let element;
         
-        if (this.userSettings.displayMode === 'hideKnown' && isKnown) {
-            // Hide known words
-            element = document.createElement('span');
-            element.className = 'ilm-word-hidden';
-            element.textContent = '___';
-            element.dataset.originalWord = wordInfo.originalCase;
-        } else {
-            // Show word with appropriate styling
-            element = document.createElement('span');
-            element.className = `ilm-word ilm-word-${classification}`;
+        // 🚀 FIXED: Priority-based word classification
+        // 1. First check if it's a basic word that should be ignored
+        if (this.isBasicWord(word) && !isKnown && !isLearning) {
+            // Return plain text for basic words not explicitly in user lists
+            return document.createTextNode(wordInfo.originalCase);
+        }
+
+        // 2. Check explicit user classifications first
+        if (isKnown) {
+            // 🚀 FIXED: Known words display as normal text with subtle styling
+            // No more hiding with "___" to maintain reading flow
+            const element = document.createElement('span');
+            element.className = 'ilm-word ilm-word-known';
             element.textContent = wordInfo.originalCase;
+            element.dataset.word = word;
+            element.dataset.classification = 'known';
+            element.dataset.ilmWord = 'true';
+            this.addWordInteractions(element, word, 'known');
+            return element;
         }
 
-        // Add data attributes
-        element.dataset.word = word;
-        element.dataset.classification = classification;
-        element.dataset.ilmWord = 'true';
-
-        // Add interaction handlers only for words that need them
-        if (classification !== 'normal') {
-            this.addWordInteractions(element, word, classification);
+        // 3. Check if it's in learning list
+        if (isLearning) {
+            const element = document.createElement('span');
+            element.className = 'ilm-word ilm-word-learning';
+            element.textContent = wordInfo.originalCase;
+            element.dataset.word = word;
+            element.dataset.classification = 'learning';
+            element.dataset.ilmWord = 'true';
+            this.addWordInteractions(element, word, 'learning');
+            return element;
         }
 
-        return element;
+        // 4. Check if it's truly unknown based on user vocabulary level
+        const isUnknown = this.isWordUnknownForUser(word);
+        
+        if (isUnknown && this.userSettings.highlightUnknownWords) {
+            const element = document.createElement('span');
+            element.className = 'ilm-word ilm-word-unknown';
+            element.textContent = wordInfo.originalCase;
+            element.dataset.word = word;
+            element.dataset.classification = 'unknown';
+            element.dataset.ilmWord = 'true';
+            this.addWordInteractions(element, word, 'unknown');
+            return element;
+        }
+
+        // 5. Default: return plain text for normal words
+        return document.createTextNode(wordInfo.originalCase);
+    }
+
+    /**
+     * Check if word is unknown for the current user based on vocabulary level
+     * @param {string} word - Word to check
+     * @returns {boolean} True if word should be considered unknown
+     */
+    isWordUnknownForUser(word) {
+        // Use user's vocabulary level setting (default 2000)
+        const userVocabLevel = this.userSettings.vocabularyLevel || 2000;
+        
+        // Get word frequency rank from COCA data if available
+        let wordRank = 9999; // Default to very uncommon
+        if (window.ilmTextAnalyzer && window.ilmTextAnalyzer.frequencyMap) {
+            const frequencyData = window.ilmTextAnalyzer.frequencyMap.get(word);
+            if (frequencyData) {
+                wordRank = frequencyData.rank || frequencyData;
+            }
+        }
+        
+        // Words beyond user's vocabulary level are considered unknown
+        if (wordRank > userVocabLevel) {
+            return true;
+        }
+        
+        // Additional checks for complex words
+        const syllables = this.countSyllables(word);
+        const isAcademic = this.isAcademicWord(word);
+        
+        // Academic words or words with many syllables might be unknown even if frequent
+        if (isAcademic && userVocabLevel < 3000) {
+            return true;
+        }
+        
+        if (syllables > 3 && userVocabLevel < 2000) {
+            return true;
+        }
+        
+        return false;
+    }
+
+    /**
+     * Check if word is academic/specialized vocabulary
+     * @param {string} word - Word to check
+     * @returns {boolean} True if word is academic
+     */
+    isAcademicWord(word) {
+        const academicWords = new Set([
+            'analyze', 'concept', 'constitute', 'data', 'derive', 'establish',
+            'evidence', 'factor', 'function', 'indicate', 'method', 'occur',
+            'percent', 'period', 'policy', 'principle', 'research', 'structure',
+            'theory', 'variable', 'significant', 'require', 'approach', 'area',
+            'assessment', 'assume', 'authority', 'available', 'benefit', 'concept',
+            'consistent', 'constitutional', 'context', 'contract', 'create', 'definition',
+            'environment', 'estimate', 'export', 'formula', 'function', 'identify',
+            'income', 'interpret', 'involve', 'legal', 'legislation', 'major',
+            'method', 'normal', 'obtain', 'participate', 'particular', 'percent',
+            'primary', 'process', 'require', 'research', 'response', 'role',
+            'section', 'significant', 'similar', 'source', 'specific', 'structure'
+        ]);
+        
+        return academicWords.has(word.toLowerCase());
+    }
+
+    /**
+     * Count syllables in a word (approximate)
+     * @param {string} word - Word to count
+     * @returns {number} Estimated syllable count
+     */
+    countSyllables(word) {
+        const vowels = 'aeiouy';
+        let count = 0;
+        let previousWasVowel = false;
+
+        for (let i = 0; i < word.length; i++) {
+            const isVowel = vowels.includes(word[i].toLowerCase());
+            if (isVowel && !previousWasVowel) {
+                count++;
+            }
+            previousWasVowel = isVowel;
+        }
+
+        // Handle silent e
+        if (word.endsWith('e') && count > 1) {
+            count--;
+        }
+
+        return Math.max(1, count);
     }
 
     /**
@@ -382,22 +515,48 @@ class WordProcessor {
      * @param {string} classification - Word classification
      */
     addWordInteractions(element, word, classification) {
-        // Hover handler for translations
+        // Hover handler for translations with improved stability
         if (this.userSettings.showTranslationOnHover) {
+            let hoverTimeout = null;
+            
             element.addEventListener('mouseenter', (e) => {
+                if (hoverTimeout) {
+                    clearTimeout(hoverTimeout);
+                    hoverTimeout = null;
+                }
                 this.showWordTooltip(e.target, word);
             });
 
             element.addEventListener('mouseleave', (e) => {
-                this.hideWordTooltip(e.target);
+                // Check if mouse is moving to the tooltip
+                const relatedTarget = e.relatedTarget;
+                const tooltip = document.querySelector('.ilm-tooltip');
+                
+                if (tooltip && relatedTarget) {
+                    // Check if mouse is moving to the tooltip or any child of the tooltip
+                    if (tooltip.contains(relatedTarget) || relatedTarget === tooltip) {
+                        // Mouse moved to tooltip, don't hide
+                        return;
+                    }
+                }
+                
+                // Delay hiding tooltip to allow mouse to move to tooltip
+                element._hoverTimeout = setTimeout(() => {
+                    const currentTooltip = document.querySelector('.ilm-tooltip');
+                    // Only hide if tooltip is not being hovered
+                    if (!currentTooltip || currentTooltip.dataset.tooltipHovered !== 'true') {
+                        this.hideWordTooltip(e.target);
+                    }
+                }, 200); // 200ms delay for stability
             });
         }
 
-        // Click handler for word actions
+        // 🚀 FIXED: Click handler now only shows tooltip, no direct marking
+        // This prevents accidental marking during reading
         element.addEventListener('click', (e) => {
             e.preventDefault();
             e.stopPropagation();
-            this.handleWordClick(word, classification, e.target);
+            this.showWordTooltip(e.target, word);
         });
 
         // Keyboard navigation
@@ -405,7 +564,7 @@ class WordProcessor {
         element.addEventListener('keydown', (e) => {
             if (e.key === 'Enter' || e.key === ' ') {
                 e.preventDefault();
-                this.handleWordClick(word, classification, e.target);
+                this.showWordTooltip(e.target, word);
             }
         });
     }
@@ -421,12 +580,14 @@ class WordProcessor {
             if (classification === 'unknown' || classification === 'learning') {
                 // Mark as known
                 await this.markWordAsKnown(word);
-                this.updateWordDisplay(element, 'known');
+                // 🚀 FIXED: Update ALL instances of the word on the page
+                this.updateAllWordInstances(word, 'known');
                 this.showTemporaryFeedback(element, '✓ Marked as known', 'success');
             } else if (classification === 'known') {
                 // Mark as learning (unknown)
                 await this.markWordAsLearning(word);
-                this.updateWordDisplay(element, 'learning');
+                // 🚀 FIXED: Update ALL instances of the word on the page
+                this.updateAllWordInstances(word, 'learning');
                 this.showTemporaryFeedback(element, '+ Added to learning list', 'info');
             } else if (element.classList.contains('ilm-word-hidden')) {
                 // Reveal hidden word temporarily
@@ -435,6 +596,47 @@ class WordProcessor {
         } catch (error) {
             console.error('❌ ILM: Word click handling failed:', error);
         }
+    }
+
+    /**
+     * Update all instances of a word across the page
+     * @param {string} word - Word to update
+     * @param {string} newClassification - New classification for the word
+     */
+    updateAllWordInstances(word, newClassification) {
+        // Find all elements with this word
+        const wordElements = document.querySelectorAll(`[data-word="${word}"]`);
+        
+        wordElements.forEach(element => {
+            const oldClassification = element.dataset.classification;
+            
+            if (newClassification === 'known') {
+                // 🚀 FIXED: Known words maintain their text content but get known styling
+                // No more hiding with "___" to preserve reading flow
+                element.className = 'ilm-word ilm-word-known';
+                element.dataset.classification = 'known';
+                
+                // Remove old event handlers and add new ones
+                this.removeWordInteractions(element);
+                this.addWordInteractions(element, word, 'known');
+            } else {
+                // Update the classification and styling
+                this.updateWordDisplay(element, newClassification);
+            }
+        });
+        
+        console.log(`📝 ILM: Updated ${wordElements.length} instances of "${word}" to ${newClassification}`);
+    }
+
+    /**
+     * Remove all event listeners from a word element
+     * @param {HTMLElement} element - Word element
+     */
+    removeWordInteractions(element) {
+        // Clone the element to remove all event listeners
+        const newElement = element.cloneNode(true);
+        element.parentNode.replaceChild(newElement, element);
+        return newElement;
     }
 
     /**
@@ -519,7 +721,7 @@ class WordProcessor {
     }
 
     /**
-     * Show word tooltip with translation
+     * Show enhanced word tooltip with translation and learning aids
      * @param {HTMLElement} element - Word element
      * @param {string} word - The word
      */
@@ -532,39 +734,17 @@ class WordProcessor {
             // Mark element as having active tooltip
             element.dataset.tooltipActive = 'true';
 
-            // Get translation
-            const translation = await this.getWordTranslation(word);
+            // Check if this is truly unknown word that needs enhanced tooltip
+            const classification = element.dataset.classification;
+            const isUnknownWord = classification === 'unknown' || classification === 'learning';
             
-            // Double-check no tooltip was created while waiting
-            if (this.elementExists('ilm-tooltip')) {
-                element.dataset.tooltipActive = 'false';
-                return;
+            if (isUnknownWord && this.userSettings.showTranslationOnHover) {
+                // Show enhanced tooltip for unknown words
+                await this.showEnhancedTooltip(element, word);
+            } else {
+                // Show simple tooltip for other words
+                await this.showSimpleTooltip(element, word);
             }
-            
-            // Create tooltip
-            const tooltip = document.createElement('div');
-            tooltip.className = 'ilm-tooltip';
-            tooltip.innerHTML = `
-                <div class="ilm-tooltip-word">${word}</div>
-                <div class="ilm-tooltip-translation">${translation}</div>
-            `;
-
-            // Position tooltip
-            const rect = element.getBoundingClientRect();
-            tooltip.style.position = 'fixed';
-            tooltip.style.left = rect.left + 'px';
-            tooltip.style.top = (rect.bottom + 5) + 'px';
-            tooltip.style.zIndex = '10000';
-
-            document.body.appendChild(tooltip);
-
-            // Auto-hide after delay
-            setTimeout(() => {
-                if (tooltip.parentNode) {
-                    tooltip.remove();
-                }
-                element.dataset.tooltipActive = 'false';
-            }, 5000);
 
         } catch (error) {
             console.error('❌ ILM: Tooltip creation failed:', error);
@@ -573,13 +753,312 @@ class WordProcessor {
     }
 
     /**
-     * Hide word tooltip
+     * Show enhanced tooltip with comprehensive word information
+     * @param {HTMLElement} element - Word element
+     * @param {string} word - The word
+     */
+    async showEnhancedTooltip(element, word) {
+        try {
+            // Get enhanced translation with multiple sources
+            const translation = await this.getEnhancedWordTranslation(word);
+            
+            // Double-check no tooltip was created while waiting
+            if (this.elementExists('ilm-tooltip')) {
+                element.dataset.tooltipActive = 'false';
+                return;
+            }
+            
+            // Create enhanced tooltip
+            const tooltip = document.createElement('div');
+            tooltip.className = 'ilm-tooltip ilm-tooltip-enhanced';
+            tooltip.innerHTML = `
+                <div class="ilm-tooltip-header">
+                    <div class="ilm-tooltip-word">${word}</div>
+                    <div class="ilm-tooltip-pronunciation">${translation.pronunciation || ''}</div>
+                </div>
+                <div class="ilm-tooltip-content">
+                    <div class="ilm-tooltip-translation">${translation.translation}</div>
+                    ${translation.partOfSpeech ? `<div class="ilm-tooltip-pos">${translation.partOfSpeech}</div>` : ''}
+                    ${translation.examples && translation.examples.length > 0 ? `
+                        <div class="ilm-tooltip-example">"${translation.examples[0]}"</div>
+                    ` : ''}
+                </div>
+                <div class="ilm-tooltip-actions">
+                    <button class="ilm-tooltip-btn" onclick="window.ilmWordProcessor.markWordAsKnown('${word}'); this.closest('.ilm-tooltip').remove();">
+                        ✓ Known
+                    </button>
+                    <button class="ilm-tooltip-btn" onclick="window.ilmWordProcessor.markWordAsLearning('${word}'); this.closest('.ilm-tooltip').remove();">
+                        📚 Learn
+                    </button>
+                </div>
+            `;
+
+            // Add hover events to tooltip to prevent hiding when mouse moves to it
+            tooltip.addEventListener('mouseenter', () => {
+                // Clear any pending hide timeout from the word element
+                if (element._hoverTimeout) {
+                    clearTimeout(element._hoverTimeout);
+                    element._hoverTimeout = null;
+                }
+                
+                // Mark tooltip as being actively hovered
+                tooltip.dataset.tooltipHovered = 'true';
+            });
+            
+            tooltip.addEventListener('mouseleave', (e) => {
+                tooltip.dataset.tooltipHovered = 'false';
+                
+                // Check if mouse is moving back to the word element
+                const relatedTarget = e.relatedTarget;
+                if (relatedTarget && relatedTarget === element) {
+                    // Mouse moved back to word, don't hide
+                    return;
+                }
+                
+                // Delay hiding to allow user to move mouse back
+                setTimeout(() => {
+                    if (tooltip.dataset.tooltipHovered !== 'true') {
+                        this.hideWordTooltip(element);
+                    }
+                }, 150);
+            });
+
+            this.positionAndShowTooltip(tooltip, element);
+
+        } catch (error) {
+            console.error('❌ ILM: Enhanced tooltip creation failed:', error);
+            // Fallback to simple tooltip
+            await this.showSimpleTooltip(element, word);
+        }
+    }
+
+    /**
+     * Show simple tooltip for basic words
+     * @param {HTMLElement} element - Word element
+     * @param {string} word - The word
+     */
+    async showSimpleTooltip(element, word) {
+        try {
+            // Get basic translation
+            const translation = await this.getWordTranslation(word);
+            
+            // Double-check no tooltip was created while waiting
+            if (this.elementExists('ilm-tooltip')) {
+                element.dataset.tooltipActive = 'false';
+                return;
+            }
+            
+            // Create simple tooltip
+            const tooltip = document.createElement('div');
+            tooltip.className = 'ilm-tooltip ilm-tooltip-simple';
+            tooltip.innerHTML = `
+                <div class="ilm-tooltip-word">${word}</div>
+                <div class="ilm-tooltip-translation">${translation}</div>
+            `;
+
+            // Add hover stability to simple tooltips too
+            tooltip.addEventListener('mouseenter', () => {
+                if (element._hoverTimeout) {
+                    clearTimeout(element._hoverTimeout);
+                    element._hoverTimeout = null;
+                }
+                tooltip.dataset.tooltipHovered = 'true';
+            });
+            
+            tooltip.addEventListener('mouseleave', (e) => {
+                tooltip.dataset.tooltipHovered = 'false';
+                const relatedTarget = e.relatedTarget;
+                if (relatedTarget && relatedTarget === element) {
+                    return;
+                }
+                
+                setTimeout(() => {
+                    if (tooltip.dataset.tooltipHovered !== 'true') {
+                        this.hideWordTooltip(element);
+                    }
+                }, 150);
+            });
+
+            this.positionAndShowTooltip(tooltip, element);
+
+        } catch (error) {
+            console.error('❌ ILM: Simple tooltip creation failed:', error);
+            element.dataset.tooltipActive = 'false';
+        }
+    }
+
+    /**
+     * Position and display tooltip with smart positioning
+     * @param {HTMLElement} tooltip - Tooltip element
+     * @param {HTMLElement} element - Reference element
+     */
+    positionAndShowTooltip(tooltip, element) {
+        const rect = element.getBoundingClientRect();
+        const tooltipWidth = 280; // Estimated width
+        const tooltipHeight = 120; // Estimated height
+        
+        // Smart positioning: prefer bottom, but adjust if near edges
+        let left = rect.left;
+        let top = rect.bottom + 8;
+        
+        // Adjust horizontal position if too close to right edge
+        if (left + tooltipWidth > window.innerWidth - 20) {
+            left = window.innerWidth - tooltipWidth - 20;
+        }
+        
+        // Adjust horizontal position if too close to left edge
+        if (left < 20) {
+            left = 20;
+        }
+        
+        // Adjust vertical position if too close to bottom edge
+        if (top + tooltipHeight > window.innerHeight - 20) {
+            top = rect.top - tooltipHeight - 8; // Show above instead
+        }
+        
+        // Apply positioning
+        tooltip.style.position = 'fixed';
+        tooltip.style.left = left + 'px';
+        tooltip.style.top = top + 'px';
+        tooltip.style.zIndex = '10000';
+
+        document.body.appendChild(tooltip);
+
+        // Store reference for cleanup
+        tooltip._sourceElement = element;
+        element._activeTooltip = tooltip;
+
+        // Auto-hide after delay if not being interacted with
+        const autoHideTimer = setTimeout(() => {
+            // Only hide if tooltip is not being hovered and element is not being hovered
+            if (tooltip.parentNode && 
+                tooltip.dataset.tooltipHovered !== 'true' && 
+                !element.matches(':hover')) {
+                tooltip.style.opacity = '0';
+                tooltip.style.transform = 'translateY(-10px)';
+                setTimeout(() => {
+                    if (tooltip.parentNode) {
+                        tooltip.remove();
+                        if (element._activeTooltip === tooltip) {
+                            element._activeTooltip = null;
+                        }
+                    }
+                }, 300);
+                element.dataset.tooltipActive = 'false';
+            }
+        }, 4000);
+        
+        // Store timer for potential cleanup
+        tooltip._autoHideTimer = autoHideTimer;
+    }
+
+    /**
+     * Get enhanced word translation with multiple data sources
+     * @param {string} word - Word to translate
+     * @returns {Promise<Object>} Enhanced translation object
+     */
+    async getEnhancedWordTranslation(word) {
+        try {
+            // Try to get bilingual translation first (English-to-English)
+            if (window.ilmBilingualEngine) {
+                const result = await window.ilmBilingualEngine.getBilingualExplanation(word, 'elementary');
+                if (result && result.length > 0) {
+                    return {
+                        translation: result[0].definition,
+                        examples: [result[0].simpleExample],
+                        partOfSpeech: result[0].partOfSpeech,
+                        pronunciation: await this.getWordPronunciation(word)
+                    };
+                }
+            }
+
+            // Fallback to regular translation service
+            if (window.ilmMultiLanguageTranslator) {
+                const result = await window.ilmMultiLanguageTranslator.translate(word, {
+                    to: 'zh', // or user's preferred language
+                    includeAlternatives: true
+                });
+                
+                if (result.success) {
+                    return {
+                        translation: result.translation,
+                        examples: result.examples || [],
+                        partOfSpeech: result.partOfSpeech,
+                        pronunciation: result.pronunciation
+                    };
+                }
+            }
+
+            // Final fallback
+            const basicTranslation = await this.getWordTranslation(word);
+            return {
+                translation: basicTranslation,
+                examples: [],
+                partOfSpeech: '',
+                pronunciation: ''
+            };
+
+        } catch (error) {
+            console.error('❌ ILM: Enhanced translation failed:', error);
+            return {
+                translation: `Definition of "${word}"`,
+                examples: [],
+                partOfSpeech: '',
+                pronunciation: ''
+            };
+        }
+    }
+
+    /**
+     * Get word pronunciation information
+     * @param {string} word - Word to get pronunciation for
+     * @returns {Promise<string>} Pronunciation guide
+     */
+    async getWordPronunciation(word) {
+        try {
+            // This would integrate with pronunciation APIs or local data
+            // For now, return a simple phonetic approximation
+            return `/${word}/`; // Placeholder
+        } catch (error) {
+            return '';
+        }
+    }
+
+    /**
+     * Hide word tooltip with comprehensive cleanup
      * @param {HTMLElement} element - Word element
      */
     hideWordTooltip(element) {
-        const tooltip = document.querySelector('.ilm-tooltip');
+        // Clear any pending hide timeout
+        if (element && element._hoverTimeout) {
+            clearTimeout(element._hoverTimeout);
+            element._hoverTimeout = null;
+        }
+        
+        // Handle specific tooltip for this element
+        let tooltip = null;
+        if (element && element._activeTooltip) {
+            tooltip = element._activeTooltip;
+        } else {
+            // Fallback to finding any active tooltip
+            tooltip = document.querySelector('.ilm-tooltip');
+        }
+        
         if (tooltip) {
+            // Clear auto-hide timer
+            if (tooltip._autoHideTimer) {
+                clearTimeout(tooltip._autoHideTimer);
+                tooltip._autoHideTimer = null;
+            }
+            
+            // Remove tooltip
             tooltip.remove();
+            
+            // Clean up references
+            if (element) {
+                element._activeTooltip = null;
+                element.dataset.tooltipActive = 'false';
+            }
         }
     }
 
@@ -629,7 +1108,7 @@ class WordProcessor {
     }
 
     /**
-     * Reveal hidden word temporarily
+     * Reveal hidden word temporarily (for hideKnown mode only)
      * @param {HTMLElement} element - Hidden word element
      */
     revealHiddenWord(element) {
@@ -638,6 +1117,9 @@ class WordProcessor {
         
         element.textContent = originalWord;
         element.classList.add('ilm-word-revealed');
+
+        // Show tooltip while revealed
+        this.showWordTooltip(element, element.dataset.word);
 
         // Hide again after delay
         setTimeout(() => {

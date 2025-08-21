@@ -174,13 +174,23 @@ class UniversalProcessor {
                 return;
             }
 
+            // 🚀 NEW: Show processing indicator
+            this.showProcessingIndicator();
+
+            // Update progress
+            this.updateProgress('Analyzing content...', 30);
+
             // Analyze page content
             this.currentAnalysis = window.ilmTextAnalyzer.analyzePageContent();
             
             if (!this.currentAnalysis) {
                 console.log('📄 ILM: No substantial content found for analysis');
+                this.hideProcessingIndicator();
                 return;
             }
+
+            // Update progress
+            this.updateProgress('Processing vocabulary...', 60);
 
             console.log('📊 ILM: Content analysis completed:', {
                 wordCount: this.currentAnalysis.wordCount,
@@ -190,14 +200,20 @@ class UniversalProcessor {
 
             // Check if preview should be shown
             if (this.shouldShowPreview(this.currentAnalysis)) {
+                // Update progress
+                this.updateProgress('Preparing preview...', 90);
                 await this.showPreviewModal();
+                this.hideProcessingIndicator();
             } else {
                 // Process content directly without preview
+                this.updateProgress('Completing setup...', 100);
                 this.processContentDirectly();
+                setTimeout(() => this.hideProcessingIndicator(), 500);
             }
 
         } catch (error) {
             console.error('❌ ILM: Page content processing failed:', error);
+            this.hideProcessingIndicator();
         }
     }
 
@@ -452,7 +468,72 @@ class UniversalProcessor {
             this.previewSystem.cleanup();
         }
 
+        // Hide processing indicator
+        this.hideProcessingIndicator();
+
         this.processedElements.clear();
+    }
+
+    /**
+     * Show processing indicator
+     */
+    showProcessingIndicator() {
+        if (document.getElementById('ilm-processing-indicator')) {
+            return; // Already showing
+        }
+
+        const indicator = document.createElement('div');
+        indicator.id = 'ilm-processing-indicator';
+        indicator.className = 'ilm-processing-indicator';
+        indicator.innerHTML = `
+            <div class="ilm-processing-content">
+                <div class="ilm-processing-spinner"></div>
+                <div class="ilm-processing-text">Preparing content analysis...</div>
+                <div class="ilm-progress-bar">
+                    <div class="ilm-progress-fill" style="width: 10%"></div>
+                </div>
+                <div class="ilm-processing-tip">This helps identify vocabulary for better learning</div>
+            </div>
+        `;
+        
+        document.body.appendChild(indicator);
+        
+        // Animate in
+        requestAnimationFrame(() => {
+            indicator.classList.add('ilm-processing-visible');
+        });
+    }
+
+    /**
+     * Update progress indicator
+     * @param {string} message - Progress message
+     * @param {number} percentage - Progress percentage (0-100)
+     */
+    updateProgress(message, percentage) {
+        const indicator = document.getElementById('ilm-processing-indicator');
+        if (!indicator) return;
+
+        const textElement = indicator.querySelector('.ilm-processing-text');
+        const fillElement = indicator.querySelector('.ilm-progress-fill');
+        
+        if (textElement) textElement.textContent = message;
+        if (fillElement) fillElement.style.width = `${percentage}%`;
+    }
+
+    /**
+     * Hide processing indicator
+     */
+    hideProcessingIndicator() {
+        const indicator = document.getElementById('ilm-processing-indicator');
+        if (indicator) {
+            indicator.classList.remove('ilm-processing-visible');
+            indicator.classList.add('ilm-processing-hiding');
+            setTimeout(() => {
+                if (indicator.parentNode) {
+                    indicator.remove();
+                }
+            }, 300);
+        }
     }
 
     /**
