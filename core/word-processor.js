@@ -285,6 +285,7 @@ class WordProcessor {
 
     /**
      * Create DOM element for a word with appropriate styling and interactions
+     * 🚀 SIMPLIFIED: 2-state system (learning/known) for better UX
      * @param {Object} wordInfo - Word information object
      * @returns {HTMLElement} Word element
      */
@@ -293,28 +294,12 @@ class WordProcessor {
         const isKnown = this.knownWords.has(word);
         const isLearning = this.learningWords.has(word);
         
-        // 🚀 FIXED: Priority-based word classification
-        // 1. First check if it's a basic word that should be ignored
-        if (this.isBasicWord(word) && !isKnown && !isLearning) {
-            // Return plain text for basic words not explicitly in user lists
+        // 1. Known words: Display as normal text for seamless reading
+        if (isKnown) {
             return document.createTextNode(wordInfo.originalCase);
         }
 
-        // 2. Check explicit user classifications first
-        if (isKnown) {
-            // 🚀 FIXED: Known words display as normal text with subtle styling
-            // No more hiding with "___" to maintain reading flow
-            const element = document.createElement('span');
-            element.className = 'ilm-word ilm-word-known';
-            element.textContent = wordInfo.originalCase;
-            element.dataset.word = word;
-            element.dataset.classification = 'known';
-            element.dataset.ilmWord = 'true';
-            this.addWordInteractions(element, word, 'known');
-            return element;
-        }
-
-        // 3. Check if it's in learning list
+        // 2. Learning words: Highlight for active learning
         if (isLearning) {
             const element = document.createElement('span');
             element.className = 'ilm-word ilm-word-learning';
@@ -322,25 +307,31 @@ class WordProcessor {
             element.dataset.word = word;
             element.dataset.classification = 'learning';
             element.dataset.ilmWord = 'true';
+            
             this.addWordInteractions(element, word, 'learning');
             return element;
         }
 
-        // 4. Check if it's truly unknown based on user vocabulary level
-        const isUnknown = this.isWordUnknownForUser(word);
+        // 3. New potentially challenging words: Auto-add to learning if they meet criteria
+        const shouldLearn = this.shouldAutoAddToLearning(word);
         
-        if (isUnknown && this.userSettings.highlightUnknownWords) {
+        if (shouldLearn && this.userSettings.highlightUnknownWords) {
+            // Automatically add to learning list for streamlined experience
+            this.learningWords.add(word);
+            this.saveWordToLearning(word);
+            
             const element = document.createElement('span');
-            element.className = 'ilm-word ilm-word-unknown';
+            element.className = 'ilm-word ilm-word-learning ilm-word-new';
             element.textContent = wordInfo.originalCase;
             element.dataset.word = word;
-            element.dataset.classification = 'unknown';
+            element.dataset.classification = 'learning';
             element.dataset.ilmWord = 'true';
-            this.addWordInteractions(element, word, 'unknown');
+            
+            this.addWordInteractions(element, word, 'learning');
             return element;
         }
 
-        // 5. Default: return plain text for normal words
+        // 4. Default: Return plain text for familiar words
         return document.createTextNode(wordInfo.originalCase);
     }
 
@@ -509,6 +500,79 @@ class WordProcessor {
     }
 
     /**
+     * 🚀 NEW: Simplified logic to determine if word should be auto-added to learning
+     * @param {string} word - Word to check
+     * @returns {boolean} True if word should be automatically added to learning list
+     */
+    shouldAutoAddToLearning(word) {
+        // Skip basic words
+        if (this.isBasicWord(word)) {
+            return false;
+        }
+
+        // Get user's vocabulary level setting (default 2000)
+        const userVocabLevel = this.userSettings.vocabularyLevel || 2000;
+        
+        // Get word frequency rank from COCA data if available
+        let wordRank = 9999; // Default to uncommon
+        if (window.ilmTextAnalyzer && window.ilmTextAnalyzer.frequencyMap) {
+            const frequencyData = window.ilmTextAnalyzer.frequencyMap.get(word);
+            if (frequencyData) {
+                wordRank = frequencyData.rank || frequencyData;
+            }
+        }
+        
+        // Words beyond user's vocabulary level should be learned
+        if (wordRank > userVocabLevel) {
+            return true;
+        }
+        
+        // Check for academic or complex words
+        const syllables = this.countSyllables(word);
+        const isAcademic = this.isAcademicWord(word);
+        
+        // Academic words or complex multi-syllable words
+        if (isAcademic && userVocabLevel < 3000) {
+            return true;
+        }
+        
+        if (syllables > 3 && userVocabLevel < 2000) {
+            return true;
+        }
+        
+        return false;
+    }
+
+    /**
+     * 🚀 NEW: Save word to learning list with batch storage updates
+     * @param {string} word - Word to save
+     */
+    async saveWordToLearning(word) {
+        try {
+            // Add to local set immediately
+            this.learningWords.add(word);
+            
+            // Batch storage updates for performance
+            if (!this.storageUpdateTimer) {
+                this.storageUpdateTimer = setTimeout(async () => {
+                    const learningWordsArray = Array.from(this.learningWords);
+                    await chrome.storage.local.set({
+                        learningWords: learningWordsArray
+                    });
+                    this.storageUpdateTimer = null;
+                }, 500); // Batch updates every 500ms
+            }
+            
+            // Optional: Notify learning manager about new word
+            if (window.ilmLearningManager) {
+                window.ilmLearningManager.onWordAddedToLearning(word);
+            }
+        } catch (error) {
+            console.error('❌ ILM: Failed to save word to learning list:', error);
+        }
+    }
+
+    /**
      * Add interaction handlers to word elements
      * @param {HTMLElement} element - Word element
      * @param {string} word - The word
@@ -551,12 +615,16 @@ class WordProcessor {
             });
         }
 
-        // 🚀 FIXED: Click handler now only shows tooltip, no direct marking
-        // This prevents accidental marking during reading
+        // 🚀 NEW: Click handler shows simplified word card
         element.addEventListener('click', (e) => {
             e.preventDefault();
             e.stopPropagation();
-            this.showWordTooltip(e.target, word);
+            
+            // Add click feedback animation
+            this.addClickFeedback(e.target);
+            
+            // Show simplified word card instead of tooltip
+            this.showSimplifiedWordCard(e.target, word);
         });
 
         // Keyboard navigation
@@ -567,6 +635,32 @@ class WordProcessor {
                 this.showWordTooltip(e.target, word);
             }
         });
+    }
+
+    /**
+     * 🚀 NEW: Add click feedback animation
+     * @param {HTMLElement} element - Element to animate
+     */
+    addClickFeedback(element) {
+        element.classList.add('ilm-word-clicked');
+        setTimeout(() => {
+            element.classList.remove('ilm-word-clicked');
+        }, 300);
+    }
+
+    /**
+     * 🚀 NEW: Show simplified word card instead of tooltip
+     * @param {HTMLElement} element - Word element
+     * @param {string} word - The word
+     */
+    showSimplifiedWordCard(element, word) {
+        // Use SimplifiedWordCard component if available
+        if (window.ilmSimplifiedWordCard) {
+            window.ilmSimplifiedWordCard.show(word, element);
+        } else {
+            // Fallback to tooltip
+            this.showWordTooltip(element, word);
+        }
     }
 
     /**

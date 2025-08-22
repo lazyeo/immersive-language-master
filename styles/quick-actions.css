@@ -1,0 +1,444 @@
+/* Immersive Language Master - Quick Actions Styles */
+/* 🚀 OPTIMIZED: Fast, responsive quick action system with keyboard shortcuts */
+
+/* ===== QUICK ACTIONS OVERLAY ===== */
+.quick-actions-overlay {
+  position: fixed;
+  z-index: 9999;
+  opacity: 0;
+  transform: translateY(5px) scale(0.95);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: none;
+  display: none;
+}
+
+.quick-actions-overlay.visible {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  pointer-events: auto;
+}
+
+.quick-actions-container {
+  display: flex;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(12px);
+  border-radius: 12px;
+  padding: 8px;
+  box-shadow: 
+    0 4px 24px rgba(0, 0, 0, 0.1),
+    0 1px 4px rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+/* ===== QUICK ACTION BUTTONS ===== */
+.quick-action-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 56px;
+  height: 56px;
+  padding: 6px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  background: transparent;
+  border: 1px solid transparent;
+  position: relative;
+}
+
+.quick-action-btn:hover,
+.quick-action-btn.hover {
+  background: rgba(59, 130, 246, 0.1);
+  border-color: rgba(59, 130, 246, 0.2);
+  transform: translateY(-1px);
+}
+
+.quick-action-btn:active {
+  transform: translateY(0);
+}
+
+/* Action Icons */
+.action-icon {
+  font-size: 18px;
+  line-height: 1;
+  margin-bottom: 2px;
+}
+
+.action-label {
+  font-size: 10px;
+  font-weight: 500;
+  color: #4b5563;
+  text-align: center;
+  line-height: 1;
+  margin-bottom: 1px;
+}
+
+.action-shortcut {
+  font-size: 8px;
+  color: #9ca3af;
+  font-weight: 600;
+  text-transform: uppercase;
+  line-height: 1;
+}
+
+/* Specific button colors */
+.quick-action-btn[data-action="known"] .action-icon {
+  color: #10b981;
+}
+
+.quick-action-btn[data-action="translate"] .action-icon {
+  color: #3b82f6;
+}
+
+.quick-action-btn[data-action="info"] .action-icon {
+  color: #6366f1;
+}
+
+.quick-action-btn[data-action="close"] .action-icon {
+  color: #ef4444;
+}
+
+.quick-action-btn[data-action="known"]:hover {
+  background: rgba(16, 185, 129, 0.1);
+  border-color: rgba(16, 185, 129, 0.2);
+}
+
+.quick-action-btn[data-action="translate"]:hover {
+  background: rgba(59, 130, 246, 0.1);
+  border-color: rgba(59, 130, 246, 0.2);
+}
+
+.quick-action-btn[data-action="info"]:hover {
+  background: rgba(99, 102, 241, 0.1);
+  border-color: rgba(99, 102, 241, 0.2);
+}
+
+.quick-action-btn[data-action="close"]:hover {
+  background: rgba(239, 68, 68, 0.1);
+  border-color: rgba(239, 68, 68, 0.2);
+}
+
+/* ===== SUCCESS NOTIFICATION ===== */
+.quick-action-notification {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 10001;
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  opacity: 0;
+  transform: translateX(100px);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: none;
+  max-width: 300px;
+}
+
+.quick-action-notification.visible {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.quick-action-notification.success {
+  background: #10b981;
+  color: white;
+  box-shadow: 0 4px 16px rgba(16, 185, 129, 0.3);
+}
+
+/* ===== KEYBOARD HELP OVERLAY ===== */
+.keyboard-help-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 10002;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(4px);
+  animation: fadeIn 0.2s ease;
+}
+
+.keyboard-help-content {
+  background: white;
+  border-radius: 16px;
+  padding: 0;
+  max-width: 400px;
+  width: 90%;
+  max-height: 80vh;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+  animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.help-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px;
+  border-bottom: 1px solid #f3f4f6;
+  background: #fafafa;
+}
+
+.help-header h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.help-close-btn {
+  background: none;
+  border: none;
+  font-size: 24px;
+  color: #6b7280;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  transition: all 0.15s ease;
+  line-height: 1;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.help-close-btn:hover {
+  background: rgba(0, 0, 0, 0.1);
+  color: #1f2937;
+}
+
+.help-shortcuts {
+  padding: 24px;
+}
+
+.shortcut-item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 0;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.shortcut-item:last-child {
+  border-bottom: none;
+}
+
+.shortcut-item kbd {
+  background: #f3f4f6;
+  color: #374151;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  min-width: 28px;
+  text-align: center;
+}
+
+.shortcut-item span {
+  flex: 1;
+  color: #4b5563;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.help-footer {
+  padding: 16px 24px;
+  background: #f9fafb;
+  border-top: 1px solid #f3f4f6;
+}
+
+.help-footer p {
+  margin: 0;
+  font-size: 13px;
+  color: #6b7280;
+  text-align: center;
+  font-style: italic;
+}
+
+/* ===== ANIMATIONS ===== */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* ===== RESPONSIVE DESIGN ===== */
+@media (max-width: 768px) {
+  .quick-actions-container {
+    gap: 6px;
+    padding: 6px;
+  }
+  
+  .quick-action-btn {
+    min-width: 48px;
+    height: 48px;
+    padding: 4px;
+  }
+  
+  .action-icon {
+    font-size: 16px;
+  }
+  
+  .action-label {
+    font-size: 9px;
+  }
+  
+  .action-shortcut {
+    font-size: 7px;
+  }
+  
+  .keyboard-help-content {
+    margin: 20px;
+    width: calc(100% - 40px);
+  }
+  
+  .help-shortcuts {
+    padding: 16px;
+  }
+  
+  .shortcut-item {
+    padding: 10px 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .quick-actions-container {
+    flex-direction: column;
+    width: 48px;
+  }
+  
+  .quick-action-btn {
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+  }
+  
+  .action-label,
+  .action-shortcut {
+    display: none;
+  }
+  
+  .action-icon {
+    font-size: 18px;
+  }
+}
+
+/* ===== HIGH CONTRAST MODE ===== */
+@media (prefers-contrast: high) {
+  .quick-actions-container {
+    background: white;
+    border: 2px solid #000;
+  }
+  
+  .quick-action-btn {
+    border: 1px solid #ccc;
+  }
+  
+  .quick-action-btn:hover {
+    border-color: #000;
+    background: #f0f0f0;
+  }
+}
+
+/* ===== REDUCED MOTION ===== */
+@media (prefers-reduced-motion: reduce) {
+  .quick-actions-overlay,
+  .quick-action-btn,
+  .quick-action-notification {
+    transition: none;
+  }
+  
+  .quick-action-notification {
+    animation: none;
+  }
+  
+  @keyframes fadeIn,
+  @keyframes slideUp {
+    from, to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+}
+
+/* ===== DARK MODE SUPPORT ===== */
+@media (prefers-color-scheme: dark) {
+  .quick-actions-container {
+    background: rgba(31, 41, 55, 0.95);
+    border-color: rgba(75, 85, 99, 0.3);
+  }
+  
+  .action-label {
+    color: #d1d5db;
+  }
+  
+  .action-shortcut {
+    color: #9ca3af;
+  }
+  
+  .keyboard-help-content {
+    background: #1f2937;
+    color: #f9fafb;
+  }
+  
+  .help-header {
+    background: #111827;
+    border-bottom-color: #374151;
+  }
+  
+  .help-header h3 {
+    color: #f9fafb;
+  }
+  
+  .help-close-btn {
+    color: #9ca3af;
+  }
+  
+  .help-close-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #f9fafb;
+  }
+  
+  .shortcut-item {
+    border-bottom-color: #374151;
+  }
+  
+  .shortcut-item kbd {
+    background: #374151;
+    color: #f9fafb;
+    border-color: #4b5563;
+  }
+  
+  .shortcut-item span {
+    color: #d1d5db;
+  }
+  
+  .help-footer {
+    background: #111827;
+    border-top-color: #374151;
+  }
+  
+  .help-footer p {
+    color: #9ca3af;
+  }
+}

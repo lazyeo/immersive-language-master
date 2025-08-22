@@ -29,10 +29,14 @@
         "services/translation-service.js", 
         "core/text-analyzer.js",
         "core/word-processor.js",
+        "components/simplified-word-card.js",
+        "components/quick-actions.js",
         "content-scripts/universal-processor.js"
       ],
       "css": [
         "styles/universal-overlay.css",
+        "styles/simplified-word-card.css",
+        "styles/quick-actions.css",
         "styles/bionic-reading.css"
       ],
       "run_at": "document_end",
@@ -49,12 +53,16 @@
         "services/translation-service.js", 
         "core/text-analyzer.js",
         "core/word-processor.js",
+        "components/simplified-word-card.js",
+        "components/quick-actions.js",
         "content-scripts/universal-processor.js",
         "content-scripts/youtube-improved.js"
       ],
       "css": [
         "styles/overlay-improved.css",
         "styles/universal-overlay.css",
+        "styles/simplified-word-card.css",
+        "styles/quick-actions.css",
         "styles/bionic-reading.css"
       ],
       "run_at": "document_end"
@@ -65,12 +73,16 @@
         "services/translation-service.js", 
         "core/text-analyzer.js",
         "core/word-processor.js",
+        "components/simplified-word-card.js",
+        "components/quick-actions.js",
         "content-scripts/universal-processor.js",
         "content-scripts/netflix-improved.js"
       ],
       "css": [
         "styles/overlay-improved.css",
         "styles/universal-overlay.css",
+        "styles/simplified-word-card.css",
+        "styles/quick-actions.css",
         "styles/bionic-reading.css"
       ],
       "run_at": "document_end"
