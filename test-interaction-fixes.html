@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interaction Fixes Test - ILM</title>
+    <style>
+        body {
+            font-family: Georgia, serif;
+            padding: 40px;
+            max-width: 900px;
+            margin: 0 auto;
+            line-height: 1.8;
+            font-size: 18px;
+            background: #f5f5f5;
+        }
+        h1 {
+            color: #333;
+            border-bottom: 3px solid #4CAF50;
+            padding-bottom: 10px;
+        }
+        .test-section {
+            background: white;
+            padding: 25px;
+            margin: 25px 0;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .fixes {
+            background: #e8f5e9;
+            border-left: 4px solid #4CAF50;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        .test-link {
+            color: #2196F3;
+            text-decoration: underline;
+            cursor: pointer;
+        }
+        .test-link:hover {
+            color: #1976D2;
+        }
+        .test-text {
+            font-size: 20px;
+            line-height: 2;
+        }
+        .status-badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 3px;
+            font-size: 12px;
+            font-weight: bold;
+            color: white;
+        }
+        .fixed { background: #4CAF50; }
+        .new { background: #2196F3; }
+        .improved { background: #FF9800; }
+    </style>
+</head>
+<body>
+    <h1>🔧 Interaction Fixes Test</h1>
+    
+    <div class="test-section">
+        <h2>✅ Fixed Issues</h2>
+        <div class="fixes">
+            <ol>
+                <li><span class="status-badge fixed">FIXED</span> <strong>Tooltip doesn't regenerate when clicking</strong>
+                    <ul>
+                        <li>Added event.stopPropagation() to prevent bubbling</li>
+                        <li>Added delay to mouseenter to prevent accidental triggers</li>
+                        <li>Tooltip clicks no longer trigger new tooltips</li>
+                    </ul>
+                </li>
+                <li><span class="status-badge fixed">FIXED</span> <strong>Links with English text are not highlighted</strong>
+                    <ul>
+                        <li>Added 'a' tag to skip list</li>
+                        <li>Check if element is inside a link</li>
+                        <li>Links remain clickable</li>
+                    </ul>
+                </li>
+                <li><span class="status-badge improved">IMPROVED</span> <strong>Highlights don't interfere with clicks</strong>
+                    <ul>
+                        <li>Fixed pointer-events for better interaction</li>
+                        <li>Words in links allow click-through</li>
+                        <li>Standalone words remain interactive</li>
+                    </ul>
+                </li>
+            </ol>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>🧪 Test Case 1: Tooltip Stability</h2>
+        <div class="test-text">
+            <p>
+                The word <strong>methodology</strong> should show a tooltip when you hover.
+                When you move your mouse to the tooltip and click buttons, it should NOT
+                create new tooltips. The tooltip should remain stable and interactive.
+            </p>
+            <p>
+                Test these <strong>sophisticated</strong> and <strong>paradigm</strong> words.
+                The tooltip should appear after a short delay (300ms) to prevent accidental triggers.
+            </p>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>🔗 Test Case 2: Links Should Not Be Processed</h2>
+        <div class="test-text">
+            <p>
+                These links should remain normal and clickable WITHOUT any highlighting:
+            </p>
+            <ul>
+                <li><a href="#" class="test-link" onclick="alert('Link clicked!'); return false;">Click this methodology link</a> - Should work normally</li>
+                <li><a href="#" class="test-link" onclick="alert('Another link!'); return false;">This paradigm link is clickable</a> - No interference</li>
+                <li><a href="https://www.google.com" target="_blank" class="test-link">External link with sophisticated words</a> - Opens in new tab</li>
+            </ul>
+            <p>
+                But these words outside links should still be highlighted:
+                <strong>methodology</strong>, <strong>paradigm</strong>, <strong>sophisticated</strong>
+            </p>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>🖱️ Test Case 3: Click Interaction</h2>
+        <div class="test-text">
+            <p>
+                Regular text with <strong>implementation</strong> and <strong>infrastructure</strong>
+                should be highlighted and clickable. When you click them, they should show
+                the word card without interfering with the page.
+            </p>
+            <p>
+                Mixed content: This <a href="#" onclick="alert('Link works!'); return false;">link contains methodology</a>
+                should be clickable, while this standalone <strong>methodology</strong> word should be highlighted.
+            </p>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>📋 Testing Checklist</h2>
+        <ol>
+            <li>✅ Hover over highlighted words - tooltip appears after 300ms delay</li>
+            <li>✅ Move to tooltip and click buttons - no new tooltips appear</li>
+            <li>✅ Click on links - they work normally without highlighting</li>
+            <li>✅ Click on highlighted words outside links - shows word card</li>
+            <li>✅ Check console - no errors during interactions</li>
+        </ol>
+    </div>
+
+    <script>
+        console.log('🔧 Interaction Fixes Test Page Loaded');
+        
+        // Test link functionality
+        document.querySelectorAll('.test-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                console.log('✅ Link clicked:', this.textContent);
+            });
+        });
+        
+        // Monitor for ILM processing
+        setTimeout(() => {
+            const processedWords = document.querySelectorAll('.ilm-word, .ilm-word-learning, .ilm-word-unknown');
+            const linksWithHighlights = document.querySelectorAll('a .ilm-word');
+            
+            console.log(`📊 Statistics:`);
+            console.log(`- Processed words: ${processedWords.length}`);
+            console.log(`- Words inside links (should be 0): ${linksWithHighlights.length}`);
+            
+            if (linksWithHighlights.length > 0) {
+                console.warn('⚠️ Found highlighted words inside links - this should not happen!');
+            } else {
+                console.log('✅ No words highlighted inside links - working correctly!');
+            }
+        }, 2000);
+    </script>
+</body>
+</html>

@@ -58,7 +58,9 @@ class QuickActions {
             this.handleGlobalKeydown(e);
         });
 
-        // Mouse movement for quick hover actions
+        // DISABLED: Mouse hover triggers to prevent conflict with word-processor tooltip
+        // Quick actions can still be triggered via keyboard shortcuts
+        /*
         document.addEventListener('mouseover', (e) => {
             this.handleMouseOver(e);
         });
@@ -66,6 +68,7 @@ class QuickActions {
         document.addEventListener('mouseout', (e) => {
             this.handleMouseOut(e);
         });
+        */
 
         // Click outside to close overlays
         document.addEventListener('click', (e) => {
@@ -114,7 +117,7 @@ class QuickActions {
         if (wordElement && this.isVisible) {
             // Delay hiding to allow mouse to move to overlay
             setTimeout(() => {
-                if (!this.isMouseOverQuickActions()) {
+                if (!this.isMouseOverQuickActions(e)) {
                     this.hideQuickActions();
                 }
             }, 200);
@@ -352,13 +355,13 @@ class QuickActions {
         }
     }
 
-    isMouseOverQuickActions() {
+    isMouseOverQuickActions(event) {
         const overlay = this.quickOverlay;
         if (!overlay) return false;
         
         const rect = overlay.getBoundingClientRect();
-        const mouseX = event.clientX || 0;
-        const mouseY = event.clientY || 0;
+        const mouseX = (event && event.clientX) || 0;
+        const mouseY = (event && event.clientY) || 0;
         
         return (
             mouseX >= rect.left &&

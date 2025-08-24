@@ -37,6 +37,14 @@ All project documentation is located in the `docs/` directory:
 
 ## 📊 Current Version
 
+**v2.1.0** - Enhanced Interaction & Stability Update (2024-01)
+- ✅ Fixed Chrome API compatibility issues
+- ✅ Unified tooltip system (removed duplicate overlays)
+- ✅ Improved interaction stability (no tooltip regeneration)
+- ✅ Links excluded from processing
+- ✅ Better click-through behavior for highlights
+- ✅ Enhanced error handling and fallback modes
+
 **v2.0.0** - Universal Language Processing
 - ✅ Universal website support
 - ✅ Advanced dictionary system

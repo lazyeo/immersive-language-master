@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unified Tooltip Test - ILM</title>
+    <style>
+        body {
+            font-family: Georgia, serif;
+            padding: 40px;
+            max-width: 900px;
+            margin: 0 auto;
+            line-height: 1.8;
+            font-size: 18px;
+            background: #f5f5f5;
+        }
+        h1 {
+            color: #333;
+            border-bottom: 3px solid #4CAF50;
+            padding-bottom: 10px;
+        }
+        .test-section {
+            background: white;
+            padding: 25px;
+            margin: 25px 0;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .feature-list {
+            background: #e8f5e9;
+            border-left: 4px solid #4CAF50;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        .feature-list li {
+            margin: 8px 0;
+        }
+        .test-text {
+            font-size: 20px;
+            line-height: 2;
+            padding: 20px;
+            background: #fafafa;
+            border-radius: 5px;
+        }
+        .status {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 3px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .status.new {
+            background: #4CAF50;
+            color: white;
+        }
+        .status.improved {
+            background: #2196F3;
+            color: white;
+        }
+        .status.fixed {
+            background: #FF9800;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <h1>🎯 Unified Tooltip System Test</h1>
+    
+    <div class="test-section">
+        <h2>✨ What's Changed</h2>
+        <div class="feature-list">
+            <ul>
+                <li><span class="status fixed">FIXED</span> No more duplicate tooltips - only ONE unified tooltip appears</li>
+                <li><span class="status new">NEW</span> Enhanced tooltip with 4 action buttons:
+                    <ul>
+                        <li>✓ Known - Mark word as known (removes highlight)</li>
+                        <li>译 Translate - Show full translation</li>
+                        <li>📚 Learn - Add to learning list</li>
+                        <li>ℹ Details - Show detailed information</li>
+                    </ul>
+                </li>
+                <li><span class="status improved">IMPROVED</span> Tooltip stays visible when hovering over it</li>
+                <li><span class="status new">NEW</span> Close button (×) in top-right corner</li>
+                <li><span class="status improved">IMPROVED</span> Better button colors on hover</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>🧪 Test Words</h2>
+        <div class="test-text">
+            <p>
+                The <strong>methodology</strong> used in this <strong>implementation</strong> 
+                demonstrates effective <strong>paradigm</strong> shifts. These <strong>sophisticated</strong> 
+                words should trigger the unified tooltip when you hover over them.
+            </p>
+            <p>
+                Test the word "methodology" - it appears multiple times. When you click "Known", 
+                ALL instances of "methodology" should lose their highlight immediately.
+            </p>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>📋 Testing Checklist</h2>
+        <ol>
+            <li>✅ Hover over any highlighted word</li>
+            <li>✅ Verify only ONE tooltip appears (not two)</li>
+            <li>✅ Move mouse to tooltip - it should stay visible</li>
+            <li>✅ Test each button:
+                <ul>
+                    <li>Click "✓ Known" - word unhighlights everywhere</li>
+                    <li>Click "译 Translate" - opens translation popup</li>
+                    <li>Click "📚 Learn" - adds to learning list</li>
+                    <li>Click "ℹ Details" - shows word details</li>
+                </ul>
+            </li>
+            <li>✅ Click × button or ESC key to close tooltip</li>
+            <li>✅ Check console - no errors should appear</li>
+        </ol>
+    </div>
+
+    <div class="test-section">
+        <h2>⌨️ Keyboard Shortcuts</h2>
+        <p>The unified tooltip supports keyboard shortcuts (shown in button tooltips):</p>
+        <ul>
+            <li><kbd>K</kbd> - Mark as Known</li>
+            <li><kbd>T</kbd> - Translate</li>
+            <li><kbd>L</kbd> - Add to Learning</li>
+            <li><kbd>I</kbd> - Show Details</li>
+            <li><kbd>ESC</kbd> - Close tooltip</li>
+        </ul>
+    </div>
+
+    <script>
+        console.log('🎯 Unified Tooltip Test Page Loaded');
+        
+        // Monitor for processed words
+        setTimeout(() => {
+            const tooltips = document.querySelectorAll('.ilm-tooltip, .quick-actions-overlay');
+            console.log(`Tooltips found: ${tooltips.length}`);
+            
+            const processedWords = document.querySelectorAll('.ilm-word, .ilm-word-learning, .ilm-word-unknown');
+            if (processedWords.length > 0) {
+                console.log(`✅ Extension active: ${processedWords.length} words processed`);
+            } else {
+                console.warn('⚠️ No processed words found');
+            }
+        }, 2000);
+    </script>
+</body>
+</html>

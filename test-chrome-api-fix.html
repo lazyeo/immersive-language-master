@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Chrome API Fix</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .test-result {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        .warning {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+        pre {
+            background: #f5f5f5;
+            padding: 10px;
+            border-radius: 3px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>Chrome API Fix Test</h1>
+    <p>This page tests the Chrome extension API fixes for the Immersive Language Master extension.</p>
+    
+    <div id="test-results"></div>
+    
+    <h2>Sample Text for Processing</h2>
+    <p id="sample-text">
+        The quick brown fox jumps over the lazy dog. This sentence contains common English words 
+        that should be processed by the text analyzer and word processor modules.
+    </p>
+
+    <!-- Load the fixed modules (only once, no duplicates) -->
+    <script src="core/text-analyzer.js"></script>
+    <script src="core/word-processor.js"></script>
+    <!-- Translation service and learning manager are loaded by the extension, not needed here -->
+    
+    <script>
+        const resultsDiv = document.getElementById('test-results');
+        
+        function addResult(message, type = 'success') {
+            const div = document.createElement('div');
+            div.className = `test-result ${type}`;
+            div.innerHTML = message;
+            resultsDiv.appendChild(div);
+        }
+        
+        // Test Chrome API availability
+        addResult('<strong>Chrome API Availability Test:</strong>', 'info');
+        if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
+            addResult('✅ Chrome storage API is available', 'success');
+        } else {
+            addResult('⚠️ Chrome storage API is NOT available (fallback mode will be used)', 'warning');
+        }
+        
+        // Test TextAnalyzer initialization
+        setTimeout(() => {
+            if (window.ilmTextAnalyzer) {
+                addResult('✅ TextAnalyzer initialized successfully', 'success');
+                
+                // Test text analysis
+                const analysis = window.ilmTextAnalyzer.analyzeText('The quick brown fox');
+                if (analysis) {
+                    addResult(`✅ Text analysis working: ${analysis.wordCount} words analyzed`, 'success');
+                }
+            } else {
+                addResult('❌ TextAnalyzer failed to initialize', 'error');
+            }
+        }, 500);
+        
+        // Test WordProcessor initialization
+        setTimeout(() => {
+            if (window.ilmWordProcessor) {
+                addResult('✅ WordProcessor initialized successfully', 'success');
+            } else {
+                addResult('❌ WordProcessor failed to initialize', 'error');
+            }
+        }, 600);
+        
+        // Test TranslationService initialization
+        setTimeout(() => {
+            if (window.ilmTranslationService) {
+                addResult('✅ TranslationService initialized successfully', 'success');
+            } else {
+                addResult('❌ TranslationService failed to initialize', 'error');
+            }
+        }, 700);
+        
+        // Test LearningManager initialization
+        setTimeout(() => {
+            if (window.ilmLearningManager) {
+                addResult('✅ LearningManager initialized successfully', 'success');
+            } else {
+                addResult('❌ LearningManager failed to initialize', 'error');
+            }
+        }, 800);
+        
+        // Check console for errors
+        setTimeout(() => {
+            addResult('<strong>Test Complete!</strong> Check the browser console for any remaining errors.', 'info');
+        }, 1000);
+    </script>
+</body>
+</html>

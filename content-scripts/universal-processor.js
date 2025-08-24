@@ -15,9 +15,20 @@ class UniversalProcessor {
 
     async initializeProcessor() {
         try {
-            // Check if extension is enabled
-            const result = await chrome.storage.local.get(['extensionEnabled']);
-            this.isEnabled = result.extensionEnabled !== false;
+            // Check if Chrome extension APIs are available
+            if (!this.isChromeAPIAvailable()) {
+                console.warn('⚠️ ILM: Chrome extension APIs not available, using fallback mode');
+                this.isEnabled = true; // Assume enabled in fallback mode
+            } else {
+                // Check if extension is enabled
+                try {
+                    const result = await chrome.storage.local.get(['extensionEnabled']);
+                    this.isEnabled = result.extensionEnabled !== false;
+                } catch (storageError) {
+                    console.warn('⚠️ ILM: Chrome storage not available, assuming enabled');
+                    this.isEnabled = true;
+                }
+            }
 
             if (!this.isEnabled) {
                 console.log('🚫 ILM: Extension disabled, skipping initialization');
@@ -537,11 +548,28 @@ class UniversalProcessor {
     }
 
     /**
+     * Check if Chrome extension APIs are available
+     * @returns {boolean} True if Chrome APIs are available
+     */
+    isChromeAPIAvailable() {
+        return typeof chrome !== 'undefined' && 
+               chrome.runtime && 
+               chrome.runtime.getURL && 
+               chrome.storage && 
+               chrome.storage.local;
+    }
+
+    /**
      * Load external script file
      * @param {string} scriptPath - Path to script file relative to extension root
      * @returns {Promise} Promise that resolves when script is loaded
      */
     async loadScript(scriptPath) {
+        if (!this.isChromeAPIAvailable()) {
+            console.warn(`⚠️ ILM: Chrome APIs not available, skipping script load: ${scriptPath}`);
+            return Promise.resolve(); // Resolve to continue without blocking
+        }
+
         return new Promise((resolve, reject) => {
             const script = document.createElement('script');
             script.src = chrome.runtime.getURL(scriptPath);

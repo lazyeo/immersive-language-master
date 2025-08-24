@@ -1,6 +1,9 @@
 // Immersive Language Master - Text Analysis Engine
 // Advanced text processing and vocabulary analysis for language learning
 
+// Prevent duplicate class definition
+if (typeof TextAnalyzer === 'undefined') {
+
 class TextAnalyzer {
     constructor() {
         this.vocabDatabase = null;
@@ -13,37 +16,60 @@ class TextAnalyzer {
 
     async initializeAnalyzer() {
         try {
+            // Check if Chrome extension APIs are available
+            if (!this.isChromeAPIAvailable()) {
+                console.warn('⚠️ ILM: Chrome extension APIs not available, using fallback mode');
+                this.initializeFallbackMode();
+                return;
+            }
+
             // Load vocabulary database
             await this.loadVocabularyDatabase();
             
-            // Get user's vocabulary level from storage
-            const result = await chrome.storage.local.get(['vocabularyLevel']);
-            if (result.vocabularyLevel) {
-                this.userVocabLevel = result.vocabularyLevel;
+            // Get user's vocabulary level from storage with fallback
+            try {
+                const result = await chrome.storage.local.get(['vocabularyLevel']);
+                if (result.vocabularyLevel) {
+                    this.userVocabLevel = result.vocabularyLevel;
+                }
+            } catch (storageError) {
+                console.warn('⚠️ ILM: Chrome storage not available, using default vocabulary level');
             }
             
             console.log('🧠 ILM: Text Analyzer initialized successfully');
         } catch (error) {
             console.error('❌ ILM: Text Analyzer initialization failed:', error);
+            this.initializeFallbackMode();
         }
     }
 
     async loadVocabularyDatabase() {
         try {
+            if (!this.isChromeAPIAvailable()) {
+                throw new Error('Chrome APIs not available');
+            }
+
             const response = await fetch(chrome.runtime.getURL('data/coca-5000.json'));
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
             this.vocabDatabase = await response.json();
             
             // Create frequency map for faster lookup
             this.frequencyMap = new Map();
-            this.vocabDatabase.forEach((word, index) => {
-                this.frequencyMap.set(word.toLowerCase(), index + 1);
+            this.vocabDatabase.forEach((entry, index) => {
+                // Handle both string and object formats
+                const word = typeof entry === 'string' ? entry : entry.word;
+                if (word) {
+                    this.frequencyMap.set(word.toLowerCase(), index + 1);
+                }
             });
             
             console.log('📚 ILM: Vocabulary database loaded -', this.vocabDatabase.length, 'words');
         } catch (error) {
             console.error('❌ ILM: Failed to load vocabulary database:', error);
-            // Create fallback frequency map
-            this.frequencyMap = new Map();
+            this.initializeFallbackFrequencyMap();
         }
     }
 
@@ -79,6 +105,60 @@ class TextAnalyzer {
             console.error('❌ ILM: Page content analysis failed:', error);
             return null;
         }
+    }
+
+    /**
+     * Analyze text content and return statistics
+     * @param {string} text - Text to analyze
+     * @returns {Object} Analysis results
+     */
+    analyzeText(text) {
+        if (!text || typeof text !== 'string') {
+            return {
+                wordCount: 0,
+                uniqueWords: 0,
+                averageWordLength: 0,
+                vocabularyLevel: 'unknown',
+                readingTime: 0
+            };
+        }
+
+        const words = text.toLowerCase().match(/\b[a-z]+\b/g) || [];
+        const uniqueWords = new Set(words);
+        const totalLength = words.reduce((sum, word) => sum + word.length, 0);
+
+        return {
+            wordCount: words.length,
+            uniqueWords: uniqueWords.size,
+            averageWordLength: words.length > 0 ? (totalLength / words.length).toFixed(1) : 0,
+            vocabularyLevel: this.estimateVocabularyLevel(words),
+            readingTime: Math.ceil(words.length / 200) // Average reading speed: 200 words/min
+        };
+    }
+
+    /**
+     * Estimate vocabulary level based on word frequency
+     * @param {Array} words - Array of words to analyze
+     * @returns {string} Vocabulary level estimate
+     */
+    estimateVocabularyLevel(words) {
+        if (!this.frequencyMap || this.frequencyMap.size === 0) {
+            return 'unknown';
+        }
+
+        let commonWords = 0;
+        for (const word of words) {
+            const freq = this.frequencyMap.get(word);
+            if (freq && freq <= 1000) {
+                commonWords++;
+            }
+        }
+
+        const commonRatio = commonWords / words.length;
+        if (commonRatio > 0.8) return 'basic';
+        if (commonRatio > 0.6) return 'intermediate';
+        if (commonRatio > 0.4) return 'advanced';
+        return 'expert';
     }
 
     /**
@@ -432,6 +512,53 @@ class TextAnalyzer {
     }
 
     /**
+     * Check if Chrome extension APIs are available
+     * @returns {boolean} True if Chrome APIs are available
+     */
+    isChromeAPIAvailable() {
+        return typeof chrome !== 'undefined' && 
+               chrome.runtime && 
+               chrome.runtime.getURL && 
+               chrome.storage && 
+               chrome.storage.local;
+    }
+
+    /**
+     * Initialize fallback mode when Chrome APIs are not available
+     */
+    initializeFallbackMode() {
+        console.log('🔄 ILM: Initializing fallback mode without Chrome APIs');
+        this.initializeFallbackFrequencyMap();
+    }
+
+    /**
+     * Initialize fallback frequency map with common words
+     */
+    initializeFallbackFrequencyMap() {
+        // Create basic frequency map with most common English words
+        this.frequencyMap = new Map([
+            ['the', 1], ['be', 2], ['and', 3], ['of', 4], ['to', 5], ['a', 6], ['in', 7], ['you', 8],
+            ['it', 9], ['have', 10], ['that', 11], ['for', 12], ['do', 13], ['he', 14], ['with', 15],
+            ['on', 16], ['this', 17], ['we', 18], ['as', 19], ['they', 20], ['at', 21], ['but', 22],
+            ['his', 23], ['from', 24], ['not', 25], ['she', 26], ['or', 27], ['all', 28], ['by', 29],
+            ['were', 30], ['can', 31], ['had', 32], ['her', 33], ['what', 34], ['there', 35],
+            ['an', 36], ['would', 37], ['said', 38], ['each', 39], ['which', 40], ['their', 41],
+            ['time', 42], ['will', 43], ['about', 44], ['if', 45], ['up', 46], ['out', 47],
+            ['many', 48], ['then', 49], ['them', 50], ['these', 51], ['so', 52], ['some', 53],
+            ['her', 54], ['would', 55], ['make', 56], ['like', 57], ['into', 58], ['him', 59],
+            ['has', 60], ['two', 61], ['more', 62], ['very', 63], ['after', 64], ['use', 65],
+            ['our', 66], ['way', 67], ['work', 68], ['life', 69], ['only', 70], ['without', 71],
+            ['you', 72], ['around', 73], ['here', 74], ['just', 75], ['over', 76], ['think', 77],
+            ['also', 78], ['back', 79], ['other', 80], ['many', 81], ['find', 82], ['day', 83],
+            ['get', 84], ['may', 85], ['say', 86], ['great', 87], ['where', 88], ['much', 89],
+            ['through', 90], ['when', 91], ['them', 92], ['well', 93], ['go', 94], ['good', 95],
+            ['new', 96], ['write', 97], ['old', 98], ['see', 99], ['now', 100]
+        ]);
+        
+        console.log('📚 ILM: Fallback vocabulary map initialized with', this.frequencyMap.size, 'words');
+    }
+
+    /**
      * Clear analysis cache
      */
     clearCache() {
@@ -458,3 +585,5 @@ if (typeof window !== 'undefined') {
 if (typeof window !== 'undefined' && !window.ilmTextAnalyzer) {
     window.ilmTextAnalyzer = new TextAnalyzer();
 }
+
+} // End of TextAnalyzer class definition check

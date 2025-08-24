@@ -12,11 +12,24 @@
     border-radius: 3px;
     padding: 1px 2px;
     margin: 0 1px;
+    display: inline-block;
+    /* Allow clicks to pass through to underlying elements when needed */
+    pointer-events: auto;
 }
 
 .ilm-word:hover {
     transform: translateY(-1px);
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* For words inside links, allow click-through */
+a .ilm-word {
+    pointer-events: none;
+}
+
+/* But still allow tooltip interaction */
+a .ilm-word:hover {
+    pointer-events: auto;
 }
 
 /* Word Classifications */
@@ -107,42 +120,89 @@
 
 /* Enhanced tooltip styles for better interactivity */
 .ilm-tooltip-enhanced {
-    max-width: 320px;
+    max-width: 380px;
     border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.ilm-tooltip-header {
+    position: relative;
+    padding-right: 20px;
+}
+
+.ilm-tooltip-close {
+    position: absolute;
+    top: -4px;
+    right: -8px;
+    width: 20px;
+    height: 20px;
+    border: none;
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    border-radius: 50%;
+    font-size: 14px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.ilm-tooltip-close:hover {
+    background: rgba(255, 0, 0, 0.5);
 }
 
 .ilm-tooltip-enhanced .ilm-tooltip-actions {
     display: flex;
-    gap: 8px;
+    gap: 4px;
     margin-top: 8px;
     padding-top: 8px;
     border-top: 1px solid rgba(255, 255, 255, 0.1);
+    justify-content: space-between;
 }
 
 .ilm-tooltip-btn {
-    padding: 4px 8px;
+    flex: 1;
+    padding: 6px 8px;
     border: 1px solid rgba(255, 255, 255, 0.2);
     background: rgba(255, 255, 255, 0.1);
     color: white;
     border-radius: 4px;
-    font-size: 12px;
+    font-size: 11px;
     cursor: pointer;
     transition: all 0.2s ease;
+    text-align: center;
+    white-space: nowrap;
 }
 
 .ilm-tooltip-btn:hover {
-    background: rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.25);
     border-color: rgba(255, 255, 255, 0.4);
     transform: translateY(-1px);
 }
 
-/* Ensure tooltips don't interfere with page interactions when not needed */
-.ilm-tooltip:not(:hover) {
-    pointer-events: none;
+.ilm-btn-known:hover {
+    background: rgba(76, 175, 80, 0.3);
+    border-color: rgba(76, 175, 80, 0.6);
 }
 
-.ilm-tooltip:hover {
-    pointer-events: auto;
+.ilm-btn-translate:hover {
+    background: rgba(33, 150, 243, 0.3);
+    border-color: rgba(33, 150, 243, 0.6);
+}
+
+.ilm-btn-learn:hover {
+    background: rgba(255, 152, 0, 0.3);
+    border-color: rgba(255, 152, 0, 0.6);
+}
+
+.ilm-btn-info:hover {
+    background: rgba(156, 39, 176, 0.3);
+    border-color: rgba(156, 39, 176, 0.6);
+}
+
+/* Ensure tooltips are always interactive */
+.ilm-tooltip {
+    pointer-events: auto !important;
 }
 
 /* ============================================

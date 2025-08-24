@@ -1,14 +1,25 @@
 // Immersive Language Master - Learning Management Service
-// Smart bookmarking, progress tracking, and spaced repetition system
+// Smart bookmarking, progress tracking, and spaced repetition system with SuperMemo 2 algorithm
+
+// Prevent duplicate class definition
+if (typeof LearningManager === 'undefined') {
 
 class LearningManager {
     constructor() {
         this.initializeData();
         this.setupEventListeners();
+        this.spacedRepetitionSystem = null; // Will be initialized after data load
     }
 
     async initializeData() {
         try {
+            // Check if chrome.storage API is available
+            if (typeof chrome === 'undefined' || !chrome.storage || !chrome.storage.local) {
+                console.warn('⚠️ ILM: Chrome storage API not available, using default data');
+                this.initializeDefaultData();
+                return;
+            }
+
             // Load existing learning data
             const result = await chrome.storage.local.get([
                 'learningRecords',
@@ -17,16 +28,21 @@ class LearningManager {
                 'learningPreferences',
                 'reviewQueue',
                 'streakData',
-                'learningGoals'
+                'learningGoals',
+                'spacedRepetitionData'
             ]);
 
-            // Initialize data structures
-            this.learningRecords = new Map(result.learningRecords || []);
-            this.bookmarkedWords = new Map(result.bookmarkedWords || []);
+            // Initialize data structures with proper array checks
+            this.learningRecords = new Map(Array.isArray(result.learningRecords) ? result.learningRecords : []);
+            this.bookmarkedWords = new Map(Array.isArray(result.bookmarkedWords) ? result.bookmarkedWords : []);
             this.studySessions = result.studySessions || [];
             this.reviewQueue = result.reviewQueue || [];
             this.streakData = result.streakData || this.getDefaultStreakData();
             this.learningGoals = result.learningGoals || this.getDefaultGoals();
+            this.spacedRepetitionData = new Map(Array.isArray(result.spacedRepetitionData) ? result.spacedRepetitionData : []);
+            
+            // Initialize SuperMemo 2 spaced repetition system
+            this.initializeSpacedRepetition();
             
             this.preferences = {
                 reviewInterval: result.learningPreferences?.reviewInterval || 'daily',
@@ -56,6 +72,7 @@ class LearningManager {
         this.reviewQueue = [];
         this.streakData = this.getDefaultStreakData();
         this.learningGoals = this.getDefaultGoals();
+        this.spacedRepetitionData = new Map();
         this.preferences = {
             reviewInterval: 'daily',
             dailyGoal: 20,
@@ -64,6 +81,7 @@ class LearningManager {
             autoBookmark: true,
             spacedRepetition: true
         };
+        this.initializeSpacedRepetition();
     }
 
     getDefaultStreakData() {
@@ -239,32 +257,108 @@ class LearningManager {
     }
 
     /**
-     * Calculate next review date using spaced repetition algorithm
+     * Initialize SuperMemo 2 spaced repetition system
+     */
+    initializeSpacedRepetition() {
+        // Dynamically load the SpacedRepetitionSystem if available
+        if (typeof SpacedRepetitionSystem !== 'undefined') {
+            this.spacedRepetitionSystem = new SpacedRepetitionSystem();
+        } else {
+            // Fallback to simple implementation if module not loaded
+            this.spacedRepetitionSystem = {
+                calculateNextReview: (wordData, quality) => {
+                    return this.fallbackCalculateNextReview(wordData, quality);
+                },
+                initializeWord: (word) => {
+                    return {
+                        word,
+                        repetitions: 0,
+                        easeFactor: 2.5,
+                        interval: 1,
+                        nextReviewDate: new Date().toISOString(),
+                        lastReviewDate: null,
+                        totalReviews: 0,
+                        successfulReviews: 0
+                    };
+                },
+                getWordsForReview: (database) => {
+                    return this.fallbackGetWordsForReview(database);
+                }
+            };
+        }
+    }
+
+    /**
+     * Fallback calculation for next review (simple spaced repetition)
+     */
+    fallbackCalculateNextReview(wordData, quality) {
+        const wasCorrect = quality >= 3;
+        let nextInterval = wordData.interval || 1;
+        
+        if (wasCorrect) {
+            nextInterval = Math.ceil(nextInterval * 2.5);
+        } else {
+            nextInterval = 1;
+        }
+        
+        const nextReviewDate = new Date();
+        nextReviewDate.setDate(nextReviewDate.getDate() + nextInterval);
+        
+        return {
+            ...wordData,
+            interval: nextInterval,
+            nextReviewDate: nextReviewDate.toISOString(),
+            lastReviewDate: new Date().toISOString()
+        };
+    }
+
+    /**
+     * Fallback method to get words for review
+     */
+    fallbackGetWordsForReview(database) {
+        const now = new Date();
+        const dueWords = [];
+        
+        for (const [word, data] of database.entries()) {
+            if (data.nextReviewDate && new Date(data.nextReviewDate) <= now) {
+                dueWords.push({ word, ...data });
+            }
+        }
+        
+        return dueWords;
+    }
+
+    /**
+     * Calculate next review date using SuperMemo 2 algorithm
      * @param {number} currentInterval - Current interval in days
      * @param {number} masteryLevel - Mastery level (0-100)
      * @param {boolean} wasCorrect - Whether last answer was correct
      * @returns {number} Next review timestamp
      */
     calculateNextReview(currentInterval, masteryLevel = 0, wasCorrect = true) {
-        let nextInterval;
-        
-        if (currentInterval === 0) {
-            // First review
-            nextInterval = 1;
-        } else if (wasCorrect) {
-            // Successful review - increase interval
-            const multiplier = Math.max(1.3, 2.5 - (masteryLevel / 100));
-            nextInterval = Math.ceil(currentInterval * multiplier);
+        // Convert to quality score for SuperMemo 2 (0-5 scale)
+        let quality;
+        if (!wasCorrect) {
+            quality = 2; // Failed
+        } else if (masteryLevel >= 80) {
+            quality = 5; // Perfect
+        } else if (masteryLevel >= 60) {
+            quality = 4; // Good
         } else {
-            // Failed review - reset interval
-            nextInterval = Math.max(1, Math.floor(currentInterval * 0.3));
+            quality = 3; // Pass
         }
-
-        // Cap maximum interval at 90 days
-        nextInterval = Math.min(nextInterval, 90);
         
-        // Calculate timestamp
-        return Date.now() + (nextInterval * 24 * 60 * 60 * 1000);
+        // Get word data from spaced repetition system
+        const wordData = {
+            interval: currentInterval,
+            repetitions: Math.floor(masteryLevel / 20),
+            easeFactor: 2.5 - (100 - masteryLevel) * 0.01
+        };
+        
+        const result = this.spacedRepetitionSystem.calculateNextReview(wordData, quality);
+        
+        // Convert back to timestamp
+        return new Date(result.nextReviewDate).getTime();
     }
 
     /**
@@ -596,6 +690,12 @@ class LearningManager {
      */
     async saveData() {
         try {
+            // Check if chrome.storage API is available
+            if (typeof chrome === 'undefined' || !chrome.storage || !chrome.storage.local) {
+                console.warn('⚠️ ILM: Chrome storage API not available, data will not persist');
+                return;
+            }
+
             await chrome.storage.local.set({
                 learningRecords: Array.from(this.learningRecords.entries()),
                 bookmarkedWords: Array.from(this.bookmarkedWords.entries()),
@@ -603,7 +703,8 @@ class LearningManager {
                 learningPreferences: this.preferences,
                 reviewQueue: this.reviewQueue,
                 streakData: this.streakData,
-                learningGoals: this.learningGoals
+                learningGoals: this.learningGoals,
+                spacedRepetitionData: Array.from(this.spacedRepetitionData.entries())
             });
         } catch (error) {
             console.error('❌ Failed to save learning data:', error);
@@ -659,3 +760,5 @@ if (typeof window !== 'undefined') {
 if (typeof window !== 'undefined' && !window.ilmLearningManager) {
     window.ilmLearningManager = new LearningManager();
 }
+
+} // End of LearningManager class definition check

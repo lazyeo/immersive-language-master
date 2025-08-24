@@ -549,14 +549,47 @@ class KeyboardShortcutsManager {
                 }
             },
 
-            startVocabTest: () => {
-                // TODO: Implement vocabulary test
-                this.showNotification('Vocabulary test coming soon!');
+            startVocabTest: async () => {
+                // Load vocabulary test system and start test
+                try {
+                    // Load test system if not already loaded
+                    if (!window.ilmVocabularyTest) {
+                        await this.loadVocabularyTestSystem();
+                    }
+                    
+                    // Get words from learning manager
+                    const words = await this.getTestWords();
+                    if (words.length === 0) {
+                        this.showNotification('No words available for testing');
+                        return;
+                    }
+                    
+                    // Create and show test UI
+                    this.showVocabularyTestUI(words);
+                    this.showNotification('Vocabulary test started!');
+                } catch (error) {
+                    console.error('Failed to start vocabulary test:', error);
+                    this.showNotification('Failed to start test');
+                }
             },
 
-            practiceRandom: () => {
-                // TODO: Implement random practice
-                this.showNotification('Random practice coming soon!');
+            practiceRandom: async () => {
+                // Start random practice mode
+                try {
+                    // Get random words from learning manager
+                    const words = await this.getRandomPracticeWords();
+                    if (words.length === 0) {
+                        this.showNotification('No words available for practice');
+                        return;
+                    }
+                    
+                    // Start practice session
+                    this.startPracticeSession(words, 'random');
+                    this.showNotification('Random practice started!');
+                } catch (error) {
+                    console.error('Failed to start practice:', error);
+                    this.showNotification('Failed to start practice');
+                }
             },
 
             practiceDue: () => {
@@ -565,9 +598,23 @@ class KeyboardShortcutsManager {
                 }
             },
 
-            practiceFavorites: () => {
-                // TODO: Implement favorites practice
-                this.showNotification('Favorites practice coming soon!');
+            practiceFavorites: async () => {
+                // Start favorites practice mode
+                try {
+                    // Get favorite words from learning manager
+                    const words = await this.getFavoritePracticeWords();
+                    if (words.length === 0) {
+                        this.showNotification('No favorite words available');
+                        return;
+                    }
+                    
+                    // Start practice session
+                    this.startPracticeSession(words, 'favorites');
+                    this.showNotification('Favorites practice started!');
+                } catch (error) {
+                    console.error('Failed to start favorites practice:', error);
+                    this.showNotification('Failed to start practice');
+                }
             },
 
             // System actions
@@ -578,13 +625,13 @@ class KeyboardShortcutsManager {
             },
 
             importData: () => {
-                // TODO: Implement import functionality
-                this.showNotification('Import functionality coming soon!');
+                // Create file input and trigger import
+                this.showImportDialog();
             },
 
             openSettings: () => {
-                // TODO: Implement settings page
-                this.showNotification('Settings page coming soon!');
+                // Open settings page
+                this.showSettingsUI();
             },
 
             cancel: () => {
@@ -1215,6 +1262,424 @@ class KeyboardShortcutsManager {
     async updateSettings(newSettings) {
         this.settings = { ...this.settings, ...newSettings };
         await this.saveSettings();
+    }
+
+    /**
+     * Load vocabulary test system
+     */
+    async loadVocabularyTestSystem() {
+        // Dynamically load the vocabulary test module
+        const script = document.createElement('script');
+        script.src = chrome.runtime.getURL('services/vocabulary-test.js');
+        document.head.appendChild(script);
+        
+        // Wait for module to load
+        return new Promise((resolve) => {
+            script.onload = () => {
+                window.ilmVocabularyTest = new VocabularyTestSystem();
+                resolve();
+            };
+        });
+    }
+
+    /**
+     * Get words for testing
+     */
+    async getTestWords() {
+        if (window.ilmLearningManager) {
+            const bookmarks = Array.from(window.ilmLearningManager.bookmarkedWords.values());
+            return bookmarks.filter(word => word.status !== 'mastered');
+        }
+        return [];
+    }
+
+    /**
+     * Get random practice words
+     */
+    async getRandomPracticeWords() {
+        if (window.ilmLearningManager) {
+            const bookmarks = Array.from(window.ilmLearningManager.bookmarkedWords.values());
+            // Shuffle and return up to 20 words
+            return this.shuffleArray(bookmarks).slice(0, 20);
+        }
+        return [];
+    }
+
+    /**
+     * Get favorite practice words
+     */
+    async getFavoritePracticeWords() {
+        if (window.ilmLearningManager) {
+            const bookmarks = Array.from(window.ilmLearningManager.bookmarkedWords.values());
+            // Filter for favorited words (you can add a favorite flag to bookmarks)
+            return bookmarks.filter(word => word.tags && word.tags.includes('favorite'));
+        }
+        return [];
+    }
+
+    /**
+     * Show vocabulary test UI
+     */
+    showVocabularyTestUI(words) {
+        // Create test using the vocabulary test system
+        const test = window.ilmVocabularyTest.createTest(words, {
+            testType: 'recognition',
+            questionCount: Math.min(20, words.length),
+            adaptive: true
+        });
+        
+        // Create and show test UI overlay
+        this.createTestOverlay(test);
+    }
+
+    /**
+     * Create test overlay UI
+     */
+    createTestOverlay(test) {
+        // Remove any existing overlay
+        const existingOverlay = document.getElementById('ilm-test-overlay');
+        if (existingOverlay) {
+            existingOverlay.remove();
+        }
+        
+        // Create overlay HTML
+        const overlay = document.createElement('div');
+        overlay.id = 'ilm-test-overlay';
+        overlay.className = 'ilm-test-overlay';
+        overlay.innerHTML = `
+            <div class="ilm-test-container">
+                <div class="ilm-test-header">
+                    <h2>Vocabulary Test</h2>
+                    <button class="ilm-test-close">×</button>
+                </div>
+                <div class="ilm-test-progress">
+                    <div class="ilm-test-progress-bar" style="width: 0%"></div>
+                    <span class="ilm-test-progress-text">Question 1 of ${test.questions.length}</span>
+                </div>
+                <div class="ilm-test-content">
+                    <div class="ilm-test-question"></div>
+                    <div class="ilm-test-options"></div>
+                    <div class="ilm-test-feedback"></div>
+                </div>
+                <div class="ilm-test-footer">
+                    <button class="ilm-test-hint">Hint</button>
+                    <button class="ilm-test-skip">Skip</button>
+                    <button class="ilm-test-next" style="display: none;">Next</button>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(overlay);
+        
+        // Setup event listeners
+        this.setupTestEventListeners(overlay, test);
+        
+        // Display first question
+        this.displayQuestion(test.getCurrentQuestion(), test);
+    }
+
+    /**
+     * Setup test event listeners
+     */
+    setupTestEventListeners(overlay, test) {
+        const closeBtn = overlay.querySelector('.ilm-test-close');
+        const hintBtn = overlay.querySelector('.ilm-test-hint');
+        const skipBtn = overlay.querySelector('.ilm-test-skip');
+        const nextBtn = overlay.querySelector('.ilm-test-next');
+        
+        closeBtn.addEventListener('click', () => {
+            overlay.remove();
+        });
+        
+        hintBtn.addEventListener('click', () => {
+            const result = window.ilmVocabularyTest.useHint();
+            if (result.success) {
+                this.showTestFeedback(result.hint, 'hint');
+            }
+        });
+        
+        skipBtn.addEventListener('click', () => {
+            this.submitTestAnswer(null, test, overlay);
+        });
+        
+        nextBtn.addEventListener('click', () => {
+            this.nextQuestion(test, overlay);
+        });
+    }
+
+    /**
+     * Display test question
+     */
+    displayQuestion(question, test) {
+        if (!question) {
+            this.showTestResults(test);
+            return;
+        }
+        
+        const questionEl = document.querySelector('.ilm-test-question');
+        const optionsEl = document.querySelector('.ilm-test-options');
+        const feedbackEl = document.querySelector('.ilm-test-feedback');
+        
+        questionEl.textContent = question.prompt;
+        feedbackEl.innerHTML = '';
+        
+        // Display options
+        optionsEl.innerHTML = '';
+        question.options.forEach((option, index) => {
+            const button = document.createElement('button');
+            button.className = 'ilm-test-option';
+            button.textContent = option;
+            button.addEventListener('click', () => {
+                this.submitTestAnswer(option, test, document.getElementById('ilm-test-overlay'));
+            });
+            optionsEl.appendChild(button);
+        });
+    }
+
+    /**
+     * Submit test answer
+     */
+    submitTestAnswer(answer, test, overlay) {
+        const result = window.ilmVocabularyTest.submitAnswer(answer);
+        
+        if (result.success) {
+            // Show feedback
+            this.showTestFeedback(result.explanation, result.isCorrect ? 'correct' : 'incorrect');
+            
+            // Update progress
+            this.updateTestProgress(result.progress, overlay);
+            
+            // Show next button
+            const nextBtn = overlay.querySelector('.ilm-test-next');
+            const skipBtn = overlay.querySelector('.ilm-test-skip');
+            nextBtn.style.display = 'block';
+            skipBtn.style.display = 'none';
+            
+            // Disable options
+            const options = overlay.querySelectorAll('.ilm-test-option');
+            options.forEach(opt => opt.disabled = true);
+        }
+    }
+
+    /**
+     * Show test feedback
+     */
+    showTestFeedback(message, type) {
+        const feedbackEl = document.querySelector('.ilm-test-feedback');
+        feedbackEl.className = `ilm-test-feedback ilm-test-feedback-${type}`;
+        feedbackEl.textContent = message;
+    }
+
+    /**
+     * Update test progress
+     */
+    updateTestProgress(progress, overlay) {
+        const progressBar = overlay.querySelector('.ilm-test-progress-bar');
+        const progressText = overlay.querySelector('.ilm-test-progress-text');
+        
+        const percentage = (progress.current / progress.total) * 100;
+        progressBar.style.width = `${percentage}%`;
+        progressText.textContent = `Question ${progress.current} of ${progress.total} - Score: ${progress.score}/${progress.current}`;
+    }
+
+    /**
+     * Next question
+     */
+    nextQuestion(test, overlay) {
+        const nextBtn = overlay.querySelector('.ilm-test-next');
+        const skipBtn = overlay.querySelector('.ilm-test-skip');
+        nextBtn.style.display = 'none';
+        skipBtn.style.display = 'block';
+        
+        const question = test.getCurrentQuestion();
+        if (question) {
+            this.displayQuestion(question, test);
+        } else {
+            this.showTestResults(test);
+        }
+    }
+
+    /**
+     * Show test results
+     */
+    showTestResults(test) {
+        const overlay = document.getElementById('ilm-test-overlay');
+        if (!overlay) return;
+        
+        const stats = test.statistics;
+        const container = overlay.querySelector('.ilm-test-container');
+        
+        container.innerHTML = `
+            <div class="ilm-test-header">
+                <h2>Test Complete!</h2>
+                <button class="ilm-test-close">×</button>
+            </div>
+            <div class="ilm-test-results">
+                <div class="ilm-test-score">
+                    <h3>Your Score: ${stats.accuracy}</h3>
+                    <p>Grade: ${stats.grade}</p>
+                </div>
+                <div class="ilm-test-stats">
+                    <p>✅ Correct: ${stats.correctAnswers}</p>
+                    <p>❌ Incorrect: ${stats.incorrectAnswers}</p>
+                    <p>⏱ Time: ${stats.totalTime}</p>
+                    <p>📊 Average: ${stats.averageTimePerQuestion}</p>
+                </div>
+                <button class="ilm-test-retry">Try Again</button>
+                <button class="ilm-test-review">Review Mistakes</button>
+            </div>
+        `;
+        
+        // Setup result event listeners
+        overlay.querySelector('.ilm-test-close').addEventListener('click', () => {
+            overlay.remove();
+        });
+        
+        overlay.querySelector('.ilm-test-retry').addEventListener('click', async () => {
+            const words = await this.getTestWords();
+            this.showVocabularyTestUI(words);
+        });
+    }
+
+    /**
+     * Start practice session
+     */
+    startPracticeSession(words, type) {
+        // Similar to test but with different UI and no scoring
+        const test = window.ilmVocabularyTest.createTest(words, {
+            testType: 'production',
+            questionCount: words.length,
+            adaptive: false
+        });
+        
+        this.showNotification(`Starting ${type} practice with ${words.length} words`);
+        this.createTestOverlay(test);
+    }
+
+    /**
+     * Show import dialog
+     */
+    showImportDialog() {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = '.json';
+        input.addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = async (event) => {
+                    try {
+                        const data = JSON.parse(event.target.result);
+                        await this.importData(data);
+                        this.showNotification('Data imported successfully!');
+                    } catch (error) {
+                        console.error('Import failed:', error);
+                        this.showNotification('Import failed: Invalid file format');
+                    }
+                };
+                reader.readAsText(file);
+            }
+        });
+        input.click();
+    }
+
+    /**
+     * Import data
+     */
+    async importData(data) {
+        if (window.ilmLearningManager && data.bookmarkedWords) {
+            // Import bookmarked words
+            for (const [id, word] of Object.entries(data.bookmarkedWords)) {
+                window.ilmLearningManager.bookmarkedWords.set(id, word);
+            }
+            await window.ilmLearningManager.saveData();
+        }
+    }
+
+    /**
+     * Show settings UI
+     */
+    showSettingsUI() {
+        // Create settings overlay
+        const overlay = document.createElement('div');
+        overlay.id = 'ilm-settings-overlay';
+        overlay.className = 'ilm-settings-overlay';
+        overlay.innerHTML = `
+            <div class="ilm-settings-container">
+                <div class="ilm-settings-header">
+                    <h2>Extension Settings</h2>
+                    <button class="ilm-settings-close">×</button>
+                </div>
+                <div class="ilm-settings-content">
+                    <h3>Learning Settings</h3>
+                    <label>
+                        <input type="checkbox" id="ilm-spaced-repetition" checked>
+                        Enable Spaced Repetition
+                    </label>
+                    <label>
+                        <input type="number" id="ilm-daily-goal" value="20" min="1" max="100">
+                        Daily Goal (words)
+                    </label>
+                    <h3>Display Settings</h3>
+                    <label>
+                        <input type="checkbox" id="ilm-show-tooltips" checked>
+                        Show Tooltips
+                    </label>
+                    <label>
+                        <input type="checkbox" id="ilm-highlight-words" checked>
+                        Highlight Words
+                    </label>
+                </div>
+                <div class="ilm-settings-footer">
+                    <button class="ilm-settings-save">Save Settings</button>
+                    <button class="ilm-settings-cancel">Cancel</button>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(overlay);
+        
+        // Setup event listeners
+        overlay.querySelector('.ilm-settings-close').addEventListener('click', () => {
+            overlay.remove();
+        });
+        
+        overlay.querySelector('.ilm-settings-cancel').addEventListener('click', () => {
+            overlay.remove();
+        });
+        
+        overlay.querySelector('.ilm-settings-save').addEventListener('click', async () => {
+            // Save settings
+            const settings = {
+                spacedRepetition: overlay.querySelector('#ilm-spaced-repetition').checked,
+                dailyGoal: parseInt(overlay.querySelector('#ilm-daily-goal').value),
+                showTooltips: overlay.querySelector('#ilm-show-tooltips').checked,
+                highlightWords: overlay.querySelector('#ilm-highlight-words').checked
+            };
+            
+            if (window.ilmLearningManager) {
+                window.ilmLearningManager.preferences = {
+                    ...window.ilmLearningManager.preferences,
+                    ...settings
+                };
+                await window.ilmLearningManager.saveData();
+            }
+            
+            this.showNotification('Settings saved!');
+            overlay.remove();
+        });
+    }
+
+    /**
+     * Shuffle array helper
+     */
+    shuffleArray(array) {
+        const shuffled = [...array];
+        for (let i = shuffled.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+        }
+        return shuffled;
     }
 }
 

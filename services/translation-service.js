@@ -1,16 +1,16 @@
 // Immersive Language Master - Translation Service
 // Supports multiple translation providers: Google Translate, AI models, and English definitions
 
+// Prevent duplicate class definition
+if (typeof TranslationService === 'undefined') {
+
+// Define provider classes first (they will be defined later in the file)
+let GoogleTranslateProvider, DeepLProvider, ClaudeProvider, ChatGPTProvider, XAIProvider, GeminiProvider;
+
 class TranslationService {
     constructor() {
-        this.providers = {
-            google: new GoogleTranslateProvider(),
-            deepl: new DeepLProvider(),
-            claude: new ClaudeProvider(),
-            chatgpt: new ChatGPTProvider(),
-            xai: new XAIProvider(),
-            gemini: new GeminiProvider()
-        };
+        // Initialize providers only if they exist
+        this.providers = {};
         
         this.defaultProvider = 'google';
         this.settings = {};
@@ -18,10 +18,33 @@ class TranslationService {
         this.maxCacheSize = 1000;
         
         this.loadSettings();
+        
+        // Initialize providers after class definitions (will be done later)
+        this.initializeProviders();
     }
 
     async loadSettings() {
         try {
+            // Check if chrome.storage API is available
+            if (typeof chrome === 'undefined' || !chrome.storage || !chrome.storage.local) {
+                console.warn('⚠️ ILM: Chrome storage API not available, using default settings');
+                this.settings = {
+                    provider: 'google',
+                    targetLanguage: 'zh-CN',
+                    apiKeys: {
+                        google: '',
+                        deepl: '',
+                        claude: '',
+                        openai: '',
+                        xai: '',
+                        gemini: ''
+                    },
+                    enabled: true,
+                    showOnHover: true
+                };
+                return;
+            }
+
             const result = await chrome.storage.local.get([
                 'translationProvider',
                 'translationLanguage',
@@ -53,6 +76,21 @@ class TranslationService {
             console.log('🌐 Translation settings loaded:', this.settings);
         } catch (error) {
             console.error('🌐 Failed to load translation settings:', error);
+            // Use default settings on error
+            this.settings = {
+                provider: 'google',
+                targetLanguage: 'zh-CN',
+                apiKeys: {
+                    google: '',
+                    deepl: '',
+                    claude: '',
+                    openai: '',
+                    xai: '',
+                    gemini: ''
+                },
+                enabled: true,
+                showOnHover: true
+            };
         }
     }
 
@@ -81,6 +119,28 @@ class TranslationService {
             ...newSettings
         };
         console.log('🌐 Translation service settings updated:', this.settings);
+    }
+
+    initializeProviders() {
+        // Initialize providers only after they are defined
+        if (typeof GoogleTranslateProvider !== 'undefined') {
+            this.providers.google = new GoogleTranslateProvider();
+        }
+        if (typeof DeepLProvider !== 'undefined') {
+            this.providers.deepl = new DeepLProvider();
+        }
+        if (typeof ClaudeProvider !== 'undefined') {
+            this.providers.claude = new ClaudeProvider();
+        }
+        if (typeof ChatGPTProvider !== 'undefined') {
+            this.providers.chatgpt = new ChatGPTProvider();
+        }
+        if (typeof XAIProvider !== 'undefined') {
+            this.providers.xai = new XAIProvider();
+        }
+        if (typeof GeminiProvider !== 'undefined') {
+            this.providers.gemini = new GeminiProvider();
+        }
     }
 
     async translate(text, options = {}) {
@@ -2082,5 +2142,19 @@ class GeminiProvider extends TranslationProvider {
     }
 }
 
+// Define provider classes
+GoogleTranslateProvider = GoogleTranslateProvider || class {};
+DeepLProvider = DeepLProvider || class {};
+ClaudeProvider = ClaudeProvider || class {};
+ChatGPTProvider = ChatGPTProvider || class {};
+XAIProvider = XAIProvider || class {};
+GeminiProvider = GeminiProvider || class {};
+
 // Export singleton instance
-window.translationService = new TranslationService();
+if (typeof window !== 'undefined' && !window.ilmTranslationService) {
+    window.ilmTranslationService = new TranslationService();
+    // Re-initialize providers now that classes are defined
+    window.ilmTranslationService.initializeProviders();
+}
+
+} // End of TranslationService class definition check

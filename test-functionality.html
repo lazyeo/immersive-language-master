@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ILM Functionality Test</title>
+    <style>
+        body {
+            font-family: Georgia, serif;
+            padding: 40px;
+            max-width: 800px;
+            margin: 0 auto;
+            line-height: 1.8;
+            font-size: 18px;
+        }
+        h1 {
+            color: #333;
+            border-bottom: 3px solid #4CAF50;
+            padding-bottom: 10px;
+        }
+        .test-section {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .instructions {
+            background: #e3f2fd;
+            border-left: 4px solid #2196F3;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        .vocabulary-test {
+            font-size: 20px;
+            line-height: 2;
+        }
+        code {
+            background: #f5f5f5;
+            padding: 2px 6px;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 ILM Extension Functionality Test</h1>
+    
+    <div class="instructions">
+        <h3>Test Instructions:</h3>
+        <ol>
+            <li>Make sure the ILM extension is installed and active</li>
+            <li>Refresh this page to trigger word processing</li>
+            <li>Test the following features:</li>
+            <ul>
+                <li>✅ Hover over highlighted words to see tooltips</li>
+                <li>✅ Click "Known" button - word should unhighlight everywhere</li>
+                <li>✅ Click "Learn" button - word should remain highlighted</li>
+                <li>✅ Check that only ONE tooltip appears at a time</li>
+                <li>✅ No console errors when interacting with words</li>
+            </ul>
+        </ol>
+    </div>
+
+    <div class="test-section vocabulary-test">
+        <h2>Common Words Test</h2>
+        <p>
+            The <strong>quick</strong> brown fox jumps over the lazy dog. 
+            The word "quick" appears multiple times in this paragraph. 
+            When you mark "quick" as known, all instances should update.
+            Here's another "quick" example to test the update functionality.
+        </p>
+    </div>
+
+    <div class="test-section vocabulary-test">
+        <h2>Intermediate Words Test</h2>
+        <p>
+            This paragraph contains more <em>sophisticated</em> vocabulary.
+            Words like <em>eloquent</em>, <em>paradigm</em>, and <em>infrastructure</em>
+            should be highlighted as learning words. The word "sophisticated" 
+            appears twice - once here and once more: sophisticated.
+        </p>
+    </div>
+
+    <div class="test-section vocabulary-test">
+        <h2>Mixed Difficulty Test</h2>
+        <p>
+            The <strong>methodology</strong> used in this <strong>analysis</strong> 
+            demonstrates various <strong>principles</strong> of language learning.
+            Some words are common (the, in, this) while others are more advanced
+            (methodology, analysis, principles). Test marking "methodology" as known
+            and verify all instances update correctly.
+        </p>
+    </div>
+
+    <div class="test-section">
+        <h2>Expected Behavior</h2>
+        <ul>
+            <li>✅ Words highlighted based on difficulty level</li>
+            <li>✅ Hover shows single tooltip with translation options</li>
+            <li>✅ Click "Known" removes highlight from ALL instances</li>
+            <li>✅ Click "Learn" keeps word highlighted for study</li>
+            <li>✅ No duplicate tooltips or overlays</li>
+            <li>✅ No console errors during interaction</li>
+        </ul>
+    </div>
+
+    <script>
+        // Log test status
+        console.log('🧪 ILM Functionality Test Page Loaded');
+        
+        // Check for extension after a delay
+        setTimeout(() => {
+            const processedWords = document.querySelectorAll('.ilm-word, .ilm-word-learning, .ilm-word-unknown');
+            if (processedWords.length > 0) {
+                console.log(`✅ Extension active: ${processedWords.length} words processed`);
+            } else {
+                console.warn('⚠️ No processed words found - extension may not be active');
+            }
+        }, 2000);
+    </script>
+</body>
+</html>

@@ -1,6 +1,9 @@
 // Immersive Language Master - Word Processor
 // Advanced word processing, highlighting, and interaction system
 
+// Prevent duplicate class definition
+if (typeof WordProcessor === 'undefined') {
+
 class WordProcessor {
     constructor() {
         this.userSettings = {};
@@ -31,6 +34,21 @@ class WordProcessor {
 
     async loadUserData() {
         try {
+            // Check if chrome.storage API is available
+            if (typeof chrome === 'undefined' || !chrome.storage || !chrome.storage.local) {
+                console.warn('⚠️ ILM: Chrome storage API not available, using defaults');
+                this.knownWords = new Set();
+                this.learningWords = new Set();
+                this.userSettings = {
+                    vocabularyLevel: 2000,
+                    displayMode: 'hideKnown',
+                    bionicReadingEnabled: false,
+                    highlightUnknownWords: true,
+                    showTranslationOnHover: true
+                };
+                return;
+            }
+
             const result = await chrome.storage.local.get([
                 'knownWords', 
                 'learningWords', 
@@ -41,8 +59,9 @@ class WordProcessor {
                 'showTranslationOnHover'
             ]);
 
-            this.knownWords = new Set(result.knownWords || []);
-            this.learningWords = new Set(result.learningWords || []);
+            // Handle the case where result.knownWords or learningWords might not be iterable
+            this.knownWords = new Set(Array.isArray(result.knownWords) ? result.knownWords : []);
+            this.learningWords = new Set(Array.isArray(result.learningWords) ? result.learningWords : []);
             this.userSettings = {
                 vocabularyLevel: result.vocabularyLevel || 2000,
                 displayMode: result.displayMode || 'hideKnown',
@@ -116,7 +135,7 @@ class WordProcessor {
      * @returns {boolean} True if element should be skipped
      */
     shouldSkipElement(element) {
-        const skipTags = ['script', 'style', 'input', 'textarea', 'select', 'button', 'code', 'pre'];
+        const skipTags = ['script', 'style', 'input', 'textarea', 'select', 'button', 'code', 'pre', 'a'];
         const skipClasses = [
             'ilm-tooltip', 'ilm-preview', 'ilm-word-overlay', 'ilm-definition-popup',
             'ilm-lookup-popup', 'ilm-enhanced-popup', 'ilm-selection-menu',
@@ -127,7 +146,13 @@ class WordProcessor {
         ];
         
         // Check tag name
-        if (skipTags.includes(element.tagName.toLowerCase())) {
+        const tagName = element.tagName.toLowerCase();
+        if (skipTags.includes(tagName)) {
+            return true;
+        }
+        
+        // Check if element is inside a link
+        if (element.closest('a')) {
             return true;
         }
 
@@ -584,11 +609,20 @@ class WordProcessor {
             let hoverTimeout = null;
             
             element.addEventListener('mouseenter', (e) => {
+                // Prevent tooltip on mouseenter if one already exists
+                if (document.querySelector('.ilm-tooltip')) {
+                    return;
+                }
+                
                 if (hoverTimeout) {
                     clearTimeout(hoverTimeout);
                     hoverTimeout = null;
                 }
-                this.showWordTooltip(e.target, word);
+                
+                // Delay showing tooltip to prevent flashing
+                hoverTimeout = setTimeout(() => {
+                    this.showWordTooltip(e.target, word);
+                }, 300); // 300ms delay
             });
 
             element.addEventListener('mouseleave', (e) => {
@@ -617,14 +651,18 @@ class WordProcessor {
 
         // 🚀 NEW: Click handler shows simplified word card
         element.addEventListener('click', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            
-            // Add click feedback animation
-            this.addClickFeedback(e.target);
-            
-            // Show simplified word card instead of tooltip
-            this.showSimplifiedWordCard(e.target, word);
+            // Only prevent default for learning words, not for words inside links
+            const isInLink = e.target.closest('a');
+            if (!isInLink) {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                // Add click feedback animation
+                this.addClickFeedback(e.target);
+                
+                // Show simplified word card instead of tooltip
+                this.showSimplifiedWordCard(e.target, word);
+            }
         });
 
         // Keyboard navigation
@@ -742,10 +780,17 @@ class WordProcessor {
         this.knownWords.add(word);
         this.learningWords.delete(word);
         
-        await chrome.storage.local.set({
-            knownWords: Array.from(this.knownWords),
-            learningWords: Array.from(this.learningWords)
-        });
+        // Save to storage if available
+        if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
+            try {
+                await chrome.storage.local.set({
+                    knownWords: Array.from(this.knownWords),
+                    learningWords: Array.from(this.learningWords)
+                });
+            } catch (error) {
+                console.warn('⚠️ ILM: Unable to save to Chrome storage:', error);
+            }
+        }
 
         // Update learning manager if available
         if (window.ilmLearningManager) {
@@ -756,11 +801,20 @@ class WordProcessor {
             });
         }
 
-        // Notify background script
-        chrome.runtime.sendMessage({
-            type: 'WORD_MARKED_AS_KNOWN',
-            word: word
-        });
+        // Notify background script if available
+        if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.sendMessage) {
+            try {
+                chrome.runtime.sendMessage({
+                    type: 'WORD_MARKED_AS_KNOWN',
+                    word: word
+                });
+            } catch (error) {
+                console.warn('⚠️ ILM: Unable to send message to background:', error);
+            }
+        }
+        
+        // Update all instances of the word on the page
+        this.updateAllWordInstances(word, 'known');
     }
 
     /**
@@ -772,10 +826,17 @@ class WordProcessor {
         this.learningWords.add(word);
         this.knownWords.delete(word);
         
-        await chrome.storage.local.set({
-            knownWords: Array.from(this.knownWords),
-            learningWords: Array.from(this.learningWords)
-        });
+        // Save to storage if available
+        if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
+            try {
+                await chrome.storage.local.set({
+                    knownWords: Array.from(this.knownWords),
+                    learningWords: Array.from(this.learningWords)
+                });
+            } catch (error) {
+                console.warn('⚠️ ILM: Unable to save to Chrome storage:', error);
+            }
+        }
 
         // Update learning manager if available
         if (window.ilmLearningManager) {
@@ -786,11 +847,50 @@ class WordProcessor {
             });
         }
 
-        // Notify background script
-        chrome.runtime.sendMessage({
-            type: 'WORD_ADDED_TO_LEARNING',
-            word: word
-        });
+        // Notify background script if available
+        if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.sendMessage) {
+            try {
+                chrome.runtime.sendMessage({
+                    type: 'WORD_ADDED_TO_LEARNING',
+                    word: word
+                });
+            } catch (error) {
+                console.warn('⚠️ ILM: Unable to send message to background:', error);
+            }
+        }
+        
+        // Update all instances of the word on the page
+        this.updateAllWordInstances(word, 'learning');
+    }
+
+    /**
+     * Show full translation popup for a word
+     * @param {string} word - Word to translate
+     */
+    async showFullTranslation(word) {
+        // Close existing tooltip
+        const existingTooltip = document.querySelector('.ilm-tooltip');
+        if (existingTooltip) {
+            existingTooltip.remove();
+        }
+        
+        // Show enhanced popup with full translation
+        await this.showEnhancedWordPopup(word);
+    }
+
+    /**
+     * Show detailed information for a word
+     * @param {string} word - Word to show details for
+     */
+    async showWordDetails(word) {
+        // Close existing tooltip
+        const existingTooltip = document.querySelector('.ilm-tooltip');
+        if (existingTooltip) {
+            existingTooltip.remove();
+        }
+        
+        // Show enhanced definition popup
+        await this.showEnhancedDefinitionPopup(word);
     }
 
     /**
@@ -869,6 +969,7 @@ class WordProcessor {
                 <div class="ilm-tooltip-header">
                     <div class="ilm-tooltip-word">${word}</div>
                     <div class="ilm-tooltip-pronunciation">${translation.pronunciation || ''}</div>
+                    <button class="ilm-tooltip-close" onclick="this.closest('.ilm-tooltip').remove();" title="Close (ESC)">×</button>
                 </div>
                 <div class="ilm-tooltip-content">
                     <div class="ilm-tooltip-translation">${translation.translation}</div>
@@ -878,17 +979,36 @@ class WordProcessor {
                     ` : ''}
                 </div>
                 <div class="ilm-tooltip-actions">
-                    <button class="ilm-tooltip-btn" onclick="window.ilmWordProcessor.markWordAsKnown('${word}'); this.closest('.ilm-tooltip').remove();">
+                    <button class="ilm-tooltip-btn ilm-btn-known" onclick="window.ilmWordProcessor.markWordAsKnown('${word}'); this.closest('.ilm-tooltip').remove();" title="Mark as Known (K)">
                         ✓ Known
                     </button>
-                    <button class="ilm-tooltip-btn" onclick="window.ilmWordProcessor.markWordAsLearning('${word}'); this.closest('.ilm-tooltip').remove();">
+                    <button class="ilm-tooltip-btn ilm-btn-translate" onclick="window.ilmWordProcessor.showFullTranslation('${word}');" title="Full Translation (T)">
+                        译 Translate
+                    </button>
+                    <button class="ilm-tooltip-btn ilm-btn-learn" onclick="window.ilmWordProcessor.markWordAsLearning('${word}'); this.closest('.ilm-tooltip').remove();" title="Add to Learning (L)">
                         📚 Learn
+                    </button>
+                    <button class="ilm-tooltip-btn ilm-btn-info" onclick="window.ilmWordProcessor.showWordDetails('${word}');" title="More Details (I)">
+                        ℹ Details
                     </button>
                 </div>
             `;
 
+            // Prevent tooltip from triggering new tooltips when clicked
+            tooltip.addEventListener('click', (e) => {
+                e.stopPropagation();
+                e.preventDefault();
+            });
+            
+            // Prevent tooltip from triggering mouseenter on underlying elements
+            tooltip.addEventListener('mousedown', (e) => {
+                e.stopPropagation();
+                e.preventDefault();
+            });
+            
             // Add hover events to tooltip to prevent hiding when mouse moves to it
-            tooltip.addEventListener('mouseenter', () => {
+            tooltip.addEventListener('mouseenter', (e) => {
+                e.stopPropagation();
                 // Clear any pending hide timeout from the word element
                 if (element._hoverTimeout) {
                     clearTimeout(element._hoverTimeout);
@@ -900,6 +1020,7 @@ class WordProcessor {
             });
             
             tooltip.addEventListener('mouseleave', (e) => {
+                e.stopPropagation();
                 tooltip.dataset.tooltipHovered = 'false';
                 
                 // Check if mouse is moving back to the word element
@@ -2788,3 +2909,5 @@ if (typeof window !== 'undefined') {
 if (typeof window !== 'undefined' && !window.ilmWordProcessor) {
     window.ilmWordProcessor = new WordProcessor();
 }
+
+} // End of WordProcessor class definition check

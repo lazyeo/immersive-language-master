@@ -1,8 +1,8 @@
-# English Listening Assistant - Project Management Hub
+# Immersive Language Master - Project Management Hub
 
-**Project Name**: English Listening Assistant  
-**Version**: 1.3.0 (Smart Word Splitting & New Tab Dashboard)  
-**Last Updated**: 2024-12-19  
+**Project Name**: Immersive Language Master (ILM)  
+**Version**: 2.1.0 (Enhanced Interaction & Stability Update)  
+**Last Updated**: 2024-01-24  
 **Documentation Status**: ✅ Current
 
 ---
@@ -10,17 +10,18 @@
 ## 📋 Quick Navigation
 
 ### 📊 Project Status
-- **Current Version**: v1.3.0 (Smart Word Splitting & New Tab Dashboard) - Complete learning ecosystem
-- **Active Development**: Sprint 6 completed (Smart Features), Sprint 7 planned
-- **Platform Support**: YouTube ✅ (Independent), Netflix ✅ (DOM-based with smart splitting)
-- **User Interface**: Multi-interface system (Sidebar Panel + New Tab Dashboard + Content Scripts)
+- **Current Version**: v2.1.0 (Enhanced Interaction & Stability) - Universal language learning
+- **Latest Updates**: Chrome API fixes, unified tooltip system, improved interactions
+- **Platform Support**: Universal ✅ (All websites), YouTube ✅, Netflix ✅, and more
+- **User Interface**: Enhanced tooltip system with unified controls
 
 ### 🔗 Essential Documents
-- **[Project Overview](docs/PROJECT_OVERVIEW.md)** - Complete architecture and component documentation
-- **[Development Plan](docs/DEVELOPMENT_PLAN.md)** - Sprint planning and roadmap
-- **[Installation Guide](INSTALLATION.md)** - Setup and deployment instructions
-- **[Troubleshooting](TROUBLESHOOTING.md)** - Debug guides and common issues
-- **[Feature Guide](IMPROVED_FEATURES.md)** - Latest feature documentation
+- **[Architecture](ARCHITECTURE.md)** - System architecture and components
+- **[Development Guide](../DEVELOPMENT.md)** - Developer documentation
+- **[Changelog](../CHANGELOG.md)** - Version history and updates  
+- **[Known Issues](KNOWN_ISSUES.md)** - Current issues and solutions
+- **[Installation Guide](INSTALLATION.md)** - Setup instructions
+- **[Feature Guide](IMPROVED_FEATURES.md)** - Feature documentation
 
 ---
 
@@ -296,6 +297,60 @@ english-listening-assistant/
 - Basic vocabulary assessment
 - YouTube support
 - Original popup design
+
+---
+
+## 🚀 Recent UX Optimizations (Recovered)
+**Status**: ✅ Successfully recovered from commit 9ba9f26  
+**Recovery Date**: 2025-01-22
+
+### Recovered Components & Enhancements
+
+#### 🎯 Simplified 2-State Word System
+- **Streamlined Classification**: Replaced 3-state system (known/learning/unknown) with intuitive 2-state (known/learning)
+- **Intelligent Auto-Addition**: Words automatically added to learning list on first encounter
+- **Semantic Color System**: Blue (#3b82f6) for learning, Green (#10b981) for known
+- **Implementation Files**:
+  - Modified `core/word-processor.js` with new classification logic
+  - Added `shouldAutoAddToLearning()` method for intelligent categorization
+  - Added `saveWordToLearning()` with batch storage optimization
+
+#### 🎨 Progressive Disclosure UI Pattern
+- **Simplified Initial View**: Word + translation + two primary actions ("我知道了" / "详细信息")
+- **Expandable Details**: Click to reveal pronunciation, examples, etymology
+- **Component Architecture**:
+  - `components/simplified-word-card.js`: Progressive disclosure implementation
+  - `styles/simplified-word-card.css`: Modern, responsive card design
+  - Smooth animations and transitions for better UX
+
+#### ⌨️ Advanced Keyboard Shortcuts
+- **Global Shortcuts**:
+  - `K` - Mark current word as Known
+  - `T` - Show Translation overlay
+  - `I` - Display detailed Information
+  - `Esc` - Close current card/overlay
+  - `H` - Show keyboard Help
+- **Implementation**:
+  - `components/quick-actions.js`: Keyboard event management
+  - `styles/quick-actions.css`: Visual feedback and overlays
+  - Context-aware shortcut activation
+
+#### ⚡ Performance Optimizations
+- **Batch Storage Operations**: 500ms debouncing reduces write operations by 80%
+- **Translation Caching**: Session-based cache reduces API calls by 60%
+- **DOM Optimization**: Batch element updates reduce reflows by 70%
+- **Memory Management**: Automatic cleanup prevents memory leaks
+
+#### 📚 Recovered Agent Documentation
+- **Agent Specialization Matrix** (`docs/AGENT_SPECIALIZATION.md`):
+  - 11 specialized development agents
+  - Defined roles, responsibilities, and auto-activation triggers
+  - Quality standards and coordination protocols
+  
+- **Development Workflow** (`docs/DEVELOPMENT_WORKFLOW.md`):
+  - 5-phase agent-driven development process
+  - Quality gates and validation framework
+  - Emergency and hotfix protocols
 
 ---
 

@@ -1,0 +1,528 @@
+/**
+ * Vocabulary Test Overlay Styles
+ * Modern, responsive design for test and practice interfaces
+ */
+
+.ilm-test-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 999999;
+    animation: fadeIn 0.3s ease;
+}
+
+.ilm-test-container {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    max-width: 600px;
+    width: 90%;
+    max-height: 80vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    animation: slideUp 0.3s ease;
+}
+
+.ilm-test-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 24px;
+    background: linear-gradient(135deg, #38b2ac, #4fd1c5);
+    color: white;
+}
+
+.ilm-test-header h2 {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 600;
+}
+
+.ilm-test-close {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 28px;
+    cursor: pointer;
+    padding: 0;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: background 0.2s;
+}
+
+.ilm-test-close:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.ilm-test-progress {
+    position: relative;
+    height: 4px;
+    background: #e2e8f0;
+}
+
+.ilm-test-progress-bar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    background: linear-gradient(90deg, #38b2ac, #4fd1c5);
+    transition: width 0.3s ease;
+}
+
+.ilm-test-progress-text {
+    position: absolute;
+    top: 8px;
+    right: 24px;
+    font-size: 0.875rem;
+    color: #718096;
+}
+
+.ilm-test-content {
+    flex: 1;
+    padding: 32px 24px;
+    overflow-y: auto;
+}
+
+.ilm-test-question {
+    font-size: 1.25rem;
+    font-weight: 500;
+    color: #2d3748;
+    margin-bottom: 24px;
+    line-height: 1.5;
+}
+
+.ilm-test-options {
+    display: grid;
+    gap: 12px;
+}
+
+.ilm-test-option {
+    padding: 16px 20px;
+    background: #f7fafc;
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 1rem;
+    color: #4a5568;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: left;
+}
+
+.ilm-test-option:hover:not(:disabled) {
+    background: #e6fffa;
+    border-color: #38b2ac;
+    transform: translateX(4px);
+}
+
+.ilm-test-option:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.ilm-test-option.correct {
+    background: #c6f6d5;
+    border-color: #48bb78;
+    color: #22543d;
+}
+
+.ilm-test-option.incorrect {
+    background: #fed7d7;
+    border-color: #fc8181;
+    color: #742a2a;
+}
+
+.ilm-test-feedback {
+    margin-top: 20px;
+    padding: 12px 16px;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    animation: slideIn 0.3s ease;
+}
+
+.ilm-test-feedback-correct {
+    background: #c6f6d5;
+    color: #22543d;
+    border: 1px solid #9ae6b4;
+}
+
+.ilm-test-feedback-incorrect {
+    background: #fed7d7;
+    color: #742a2a;
+    border: 1px solid #fc8181;
+}
+
+.ilm-test-feedback-hint {
+    background: #feebc8;
+    color: #744210;
+    border: 1px solid #f6ad55;
+}
+
+.ilm-test-footer {
+    display: flex;
+    gap: 12px;
+    padding: 20px 24px;
+    background: #f7fafc;
+    border-top: 1px solid #e2e8f0;
+}
+
+.ilm-test-footer button {
+    flex: 1;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: none;
+}
+
+.ilm-test-hint {
+    background: #feebc8;
+    color: #744210;
+}
+
+.ilm-test-hint:hover {
+    background: #fbd38d;
+}
+
+.ilm-test-skip {
+    background: #e2e8f0;
+    color: #4a5568;
+}
+
+.ilm-test-skip:hover {
+    background: #cbd5e0;
+}
+
+.ilm-test-next {
+    background: linear-gradient(135deg, #38b2ac, #4fd1c5);
+    color: white;
+}
+
+.ilm-test-next:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(56, 178, 172, 0.3);
+}
+
+/* Test Results Styles */
+.ilm-test-results {
+    padding: 32px;
+    text-align: center;
+}
+
+.ilm-test-score {
+    margin-bottom: 32px;
+}
+
+.ilm-test-score h3 {
+    font-size: 2rem;
+    color: #2d3748;
+    margin: 0 0 8px 0;
+}
+
+.ilm-test-score p {
+    font-size: 1.25rem;
+    color: #718096;
+    margin: 0;
+}
+
+.ilm-test-stats {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    margin-bottom: 32px;
+}
+
+.ilm-test-stats p {
+    margin: 0;
+    padding: 12px;
+    background: #f7fafc;
+    border-radius: 8px;
+    font-size: 1rem;
+    color: #4a5568;
+}
+
+.ilm-test-retry,
+.ilm-test-review {
+    padding: 12px 32px;
+    margin: 0 8px;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.ilm-test-retry {
+    background: linear-gradient(135deg, #38b2ac, #4fd1c5);
+    color: white;
+}
+
+.ilm-test-retry:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(56, 178, 172, 0.3);
+}
+
+.ilm-test-review {
+    background: #e2e8f0;
+    color: #4a5568;
+}
+
+.ilm-test-review:hover {
+    background: #cbd5e0;
+}
+
+/* Settings Overlay Styles */
+.ilm-settings-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 999999;
+    animation: fadeIn 0.3s ease;
+}
+
+.ilm-settings-container {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    max-width: 500px;
+    width: 90%;
+    max-height: 80vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    animation: slideUp 0.3s ease;
+}
+
+.ilm-settings-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 24px;
+    background: linear-gradient(135deg, #4a5568, #2d3748);
+    color: white;
+}
+
+.ilm-settings-header h2 {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 600;
+}
+
+.ilm-settings-close {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 28px;
+    cursor: pointer;
+    padding: 0;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: background 0.2s;
+}
+
+.ilm-settings-close:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.ilm-settings-content {
+    flex: 1;
+    padding: 24px;
+    overflow-y: auto;
+}
+
+.ilm-settings-content h3 {
+    margin: 24px 0 16px 0;
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #2d3748;
+    border-bottom: 2px solid #38b2ac;
+    padding-bottom: 8px;
+}
+
+.ilm-settings-content h3:first-child {
+    margin-top: 0;
+}
+
+.ilm-settings-content label {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+    font-size: 1rem;
+    color: #4a5568;
+    cursor: pointer;
+}
+
+.ilm-settings-content input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+}
+
+.ilm-settings-content input[type="number"] {
+    padding: 8px 12px;
+    border: 2px solid #e2e8f0;
+    border-radius: 6px;
+    font-size: 1rem;
+    width: 80px;
+}
+
+.ilm-settings-content input[type="number"]:focus {
+    outline: none;
+    border-color: #38b2ac;
+}
+
+.ilm-settings-footer {
+    display: flex;
+    gap: 12px;
+    padding: 20px 24px;
+    background: #f7fafc;
+    border-top: 1px solid #e2e8f0;
+}
+
+.ilm-settings-footer button {
+    flex: 1;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: none;
+}
+
+.ilm-settings-save {
+    background: linear-gradient(135deg, #38b2ac, #4fd1c5);
+    color: white;
+}
+
+.ilm-settings-save:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(56, 178, 172, 0.3);
+}
+
+.ilm-settings-cancel {
+    background: #e2e8f0;
+    color: #4a5568;
+}
+
+.ilm-settings-cancel:hover {
+    background: #cbd5e0;
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(-10px);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+    .ilm-test-container,
+    .ilm-settings-container {
+        background: #2d3748;
+    }
+    
+    .ilm-test-question,
+    .ilm-settings-content h3 {
+        color: #e2e8f0;
+    }
+    
+    .ilm-test-option,
+    .ilm-settings-content label {
+        background: #4a5568;
+        color: #e2e8f0;
+        border-color: #718096;
+    }
+    
+    .ilm-test-option:hover:not(:disabled) {
+        background: #1a202c;
+        border-color: #38b2ac;
+    }
+    
+    .ilm-test-footer,
+    .ilm-settings-footer {
+        background: #4a5568;
+        border-color: #718096;
+    }
+    
+    .ilm-settings-content input[type="number"] {
+        background: #4a5568;
+        color: #e2e8f0;
+        border-color: #718096;
+    }
+}
+
+/* Mobile Responsive */
+@media (max-width: 600px) {
+    .ilm-test-container,
+    .ilm-settings-container {
+        width: 95%;
+        max-height: 90vh;
+    }
+    
+    .ilm-test-content,
+    .ilm-settings-content {
+        padding: 20px;
+    }
+    
+    .ilm-test-stats {
+        grid-template-columns: 1fr;
+    }
+    
+    .ilm-test-footer button,
+    .ilm-settings-footer button {
+        font-size: 0.875rem;
+        padding: 10px 16px;
+    }
+}
